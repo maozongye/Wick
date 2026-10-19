@@ -100,6 +100,14 @@ jobs:
       - name: Install build tools
         run: uv sync --locked --project wekit-zygisk --group build
 
+      - name: Install Android NDK
+        run: |
+          NDK_VERSION=$(sed -n 's/^ndk = "\(.*\)"/\1/p' gradle/libs.versions.toml)
+          echo "Installing NDK $NDK_VERSION"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$NDK_VERSION"
+          ls "$ANDROID_HOME/ndk/$NDK_VERSION" >/dev/null
+
       - name: Build native libraries only
         run: |
           export PATH="$PWD/wekit-zygisk/.venv/bin:$PATH"
