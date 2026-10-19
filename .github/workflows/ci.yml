@@ -28,9 +28,80 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  # Everything that does not need the private lsparanoid plugin. This is the job a fork
+  # can actually keep green, and it covers the parts of the change set that are verifiable
+  # without a signed APK: resource catalogs, the Rust crates, and the xtask tool itself.
+  verify:
     runs-on: ubuntu-latest
     if: |
+      !startsWith(github.event.head_commit.message, '[skip ci]') &&
+      (github.event_name == 'pull_request' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: aarch64-linux-android
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install build tools
+        run: uv sync --locked --project wekit-zygisk --group build
+
+      - name: Validate i18n catalogs
+        run: cargo xtask i18n-check
+
+      - name: Test xtask
+        run: cargo test -p xtask
+
+      - name: Test the Zygisk native crate
+        # Host-target tests only. The build script needs cmake+ninja (from the uv build
+        # group) and a working C toolchain; the Android cross build additionally needs the
+        # NDK and a CMake-built DexKit, so that part stays in the main build job.
+        run: |
+          export PATH="$PWD/wekit-zygisk/.venv/bin:$PATH"
+          cargo test -p wekit-zygisk --lib
+
+  # The upstream author publishes the lsparanoid Gradle plugin only to a private package
+  # registry. Without it Gradle fails at configuration time, so probe for it first and skip
+  # the build jobs with an explicit reason instead of showing a red build caused by a
+  # dependency no fork can obtain.
+  dependencies:
+    runs-on: ubuntu-latest
+    outputs:
+      lsparanoid: ${{ steps.probe.outputs.available }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: probe
+        name: Probe for the private lsparanoid plugin
+        run: |
+          set -euo pipefail
+          # mavenLocal() is the only repository the upstream config declares for this group.
+          if [ -d "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "lsparanoid plugin found in the local Maven repository."
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=lsparanoid unavailable::The lsparanoid Gradle plugin is published only to a private registry, so this fork cannot build the APK. Build and dex-test are skipped; everything that does not need that plugin still runs."
+          fi
+
+  build:
+    needs: dependencies
+    runs-on: ubuntu-latest
+    if: |
+      needs.dependencies.outputs.lsparanoid == 'true' &&
       (
         !startsWith(github.event.head_commit.message, '[skip ci]') &&
         (
@@ -208,8 +279,11 @@ jobs:
           df -h /
 
   dex-test:
+    needs: dependencies
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+    if: |
+      needs.dependencies.outputs.lsparanoid == 'true' &&
+      (github.event_name == 'pull_request' || github.ref == 'refs/heads/master')
     outputs:
       reports-available: ${{ steps.report-check.outputs.available }}
     steps:
