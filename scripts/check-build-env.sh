@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# CI trigger marker: changing this line retriggers the build workflow.
 # Reports whether this machine can build WeKit. Read-only: it never installs or modifies anything.
 #
 #   sh scripts/check-build-env.sh
