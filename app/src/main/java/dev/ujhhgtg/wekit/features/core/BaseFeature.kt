@@ -8,6 +8,9 @@ import dev.ujhhgtg.reflekt.reflected.BaseReflectedMethod
 import dev.ujhhgtg.reflekt.reflected.ReflectedConstructor
 import dev.ujhhgtg.reflekt.reflekt
 import dev.ujhhgtg.wekit.dexkit.dsl.BaseDexDelegate
+import dev.ujhhgtg.wekit.dexkit.resolution.DexResolutionStatus
+import dev.ujhhgtg.wekit.dexkit.cache.DexCacheManager
+import dev.ujhhgtg.wekit.dexkit.abc.IResolveDex
 import dev.ujhhgtg.wekit.dexkit.dsl.DexConstructorDelegate
 import dev.ujhhgtg.wekit.dexkit.dsl.DexMethodDelegate
 import dev.ujhhgtg.wekit.utils.HookAction
@@ -15,6 +18,7 @@ import dev.ujhhgtg.wekit.utils.HookHandle
 import dev.ujhhgtg.wekit.utils.HookParam
 import dev.ujhhgtg.wekit.utils.TargetProcess
 import dev.ujhhgtg.wekit.utils.TargetProcesses
+import dev.ujhhgtg.wekit.utils.RiskControlGate
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.hookAfterDirectly
 import dev.ujhhgtg.wekit.utils.hookBeforeDirectly
@@ -51,10 +55,28 @@ abstract class BaseFeature {
 
     /** Whether this feature's hooks are currently installed (runtime truth). */
     var isActive: Boolean = false
-        private set
+        protected set
+
+    /**
+     * True for features that produce server-visible automation (batch sends, auto-likes,
+     * …). [enable] refuses to run them while [RiskControlGate] is at L2 or above, so the module
+     * stops all automation the moment WeChat signals the account is under scrutiny.
+     */
+    open val automationRisk: Boolean get() = false
 
     fun enable() {
         if (TargetProcesses.currentType !in targetProcesses || isActive) return
+        if (automationRisk && !RiskControlGate.automationAllowed) {
+            WeLogger.w(
+                TAG,
+                "automation blocked by risk-control gate: $technicalPath (level=${RiskControlGate.level})",
+            )
+            return
+        }
+        // Features that were disabled at startup are not resolved eagerly (see FeaturesLoader).
+        // The first time the user turns one on, load its descriptors here so hooks can install;
+        // without this the feature would silently never work.
+        ensureDexResolved()
 
         runCatching {
             isActive = true
@@ -83,6 +105,30 @@ abstract class BaseFeature {
     open fun onEnable() {}
 
     open fun onDisable() {}
+
+    /**
+     * Loads this feature's Dex descriptors from cache if it has never been resolved.
+     *
+     * Startup only resolves features that will actually run, so a feature enabled later needs
+     * its descriptors before [onEnable] touches them. A cache miss is logged loudly: the
+     * feature then fails inside its own `runCatching` instead of appearing to work.
+     */
+    private fun ensureDexResolved() {
+        if (this !is IResolveDex || dexDelegates.isEmpty()) return
+        if (dexDelegates.none { it.diagnostic.status == DexResolutionStatus.PENDING }) return
+        val cache = runCatching { DexCacheManager.loadItemCache(this) }.getOrNull()
+        if (cache == null) {
+            WeLogger.w(
+                TAG,
+                "no Dex cache for $technicalPath; it was never resolved, so its hooks cannot install",
+            )
+            return
+        }
+        val missing = loadFromCache(cache)
+        if (missing.isNotEmpty()) {
+            WeLogger.w(TAG, "$technicalPath missing $missing descriptor(s) from cache")
+        }
+    }
 
     private val _dexDelegates = mutableListOf<BaseDexDelegate>()
     val dexDelegates: List<BaseDexDelegate> get() = _dexDelegates

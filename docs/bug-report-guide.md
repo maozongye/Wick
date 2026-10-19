@@ -34,7 +34,7 @@
 根据实际加载方式提供日志:
 
 - **LSPosed**: LSPosed -> 底栏「设置」->「禁用详细日志」关闭 -> 底栏 「日志」-> 右上角菜单「保存」-> 上传压缩包
-- **Zygisk**: 在 WeKit 模块 WebUI 点击「导出日志」, 上传 `/data/adb/wekit_zygisk/logcat.log`
+- **Zygisk**: 在 WeKit 模块 WebUI 点击「导出日志」, 上传 `/data/adb/wick_zygisk/logcat.log`
   并附上页面底部的 WebUI 日志。注明实际刷入的 APK 文件名和版本、Root 管理器与
   Zygisk 实现及其版本, 以及目标 Android 用户和微信包名。
 

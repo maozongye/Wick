@@ -286,7 +286,7 @@ APK 仍输出到 `app/build/outputs/apk/<standard|legacy>/<debug|release>/`。
 使用 `.zip` 文件名。CI 检查后发布这份 APK，不另行构建或发布模块 ZIP。
 
 模块安装器直接保存原始 APK 为 `$MODPATH/module.apk`，注入器从这份 APK 读取 DEX。
-安装器同时从 `lib/arm64-v8a/libwekit_zygisk.so` 提取注入器至
+安装器同时从 `lib/arm64-v8a/libwick_zygisk.so` 提取注入器至
 `$MODPATH/zygisk/arm64-v8a.so`，不另行解包 DEX。
 
 `preAppSpecialize` 检查注入目标并保留模块目录 FD，`postAppSpecialize` 再打开
@@ -309,7 +309,7 @@ APK 仍输出到 `app/build/outputs/apk/<standard|legacy>/<debug|release>/`。
 ### ART Hook 实现与验证
 
 Zygisk 的生命周期、companion IPC、APK 加载、JNI 注册和 ART 符号解析由 Rust
-实现。Java 方法 Hook 使用静态链接到 `libwekit_zygisk.so` 的 LSPlant，原生
+实现。Java 方法 Hook 使用静态链接到 `libwick_zygisk.so` 的 LSPlant，原生
 inline hook 由 `wekit-zygisk/native/src/art/inline_hook/` 下的 Rust ARM64 后端
 提供；不再使用原先自研的 ART 方法 Hook，也不再依赖 Dobby。
 

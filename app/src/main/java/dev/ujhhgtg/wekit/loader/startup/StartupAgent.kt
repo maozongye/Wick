@@ -21,8 +21,6 @@ import dev.ujhhgtg.wekit.utils.fs.LegacyStorageMigration
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import java.io.File
 import java.lang.reflect.Field
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.deleteRecursively
 
 object StartupAgent {
 
@@ -33,7 +31,6 @@ object StartupAgent {
     @Volatile
     private var initialized = false
 
-    @OptIn(ExperimentalPathApi::class)
     fun startup(
         loaderService: ILoaderService,
         hookBridge: IHookBridge?,
@@ -81,17 +78,20 @@ object StartupAgent {
             WeLauncher.init(application)
         }
 
-        runCatching {
-            application.dataDir.toPath().resolve("app_qqprotect").deleteRecursively()
-        }.onFailure { WeLogger.e(TAG, "failed to delete app_qqprotect", it) }
-
         // Only commit after every required startup phase completes. The caller
         // already logs a thrown failure, and a later lifecycle callback can retry.
         initialized = true
     }
 
     private fun hideModuleLibraries(hookBridge: ArtHookBridge) {
-        runCatching { hookBridge.hideLoadedModuleLibraries() }
+        // The payload APK's own file name is the precise needle for its published copy:
+        // hiding the whole code_cache would also hide host files living there. The
+        // extraction-root name covers every extracted module library by prefix.
+        runCatching {
+            hookBridge.hideLoadedModuleLibraries(
+                listOf(NativeLoader.zygiskNativeDirName(), NativeLoader.bootstrapApk().name),
+            )
+        }
             .onSuccess { hidden ->
                 WeLogger.i(
                     TAG,

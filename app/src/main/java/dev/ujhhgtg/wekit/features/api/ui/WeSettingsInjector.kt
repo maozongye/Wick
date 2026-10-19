@@ -35,6 +35,7 @@ import dev.ujhhgtg.wekit.utils.HostInfo
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.reflection.bool
 import dev.ujhhgtg.wekit.utils.reflection.int
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import org.luckypray.dexkit.DexKitBridge
 import org.luckypray.dexkit.query.enums.StringMatchType
 import java.lang.reflect.Modifier
@@ -406,10 +407,10 @@ object WeSettingsInjector : ApiFeature(), IResolveDex, WeChatInputBarApi.IInputB
                 .hookBefore {
                     val activity = thisObject as Activity
                     val intent = activity.intent ?: return@hookBefore
-                    intent.getStringExtra(BuildConfig.TAG) ?: return@hookBefore
+                    intent.getStringExtra(BuildFingerprint.intentKey) ?: return@hookBefore
                     // 消费掉标记，否则 getIntent() 会一直带着它，
                     // 之后每次 onNewIntent 都会重新弹出设置界面
-                    intent.removeExtra(BuildConfig.TAG)
+                    intent.removeExtra(BuildFingerprint.intentKey)
                     // wait for resources & theme to init
                     Handler(Looper.getMainLooper()).postDelayed({
                         openSettingsDialog(activity)
@@ -422,8 +423,8 @@ object WeSettingsInjector : ApiFeature(), IResolveDex, WeChatInputBarApi.IInputB
                     // LauncherUI 是 singleTop，新的 Intent 在 args[0] 里；
                     // 此时 getIntent() 还是旧的那一个
                     val intent = args.getOrNull(0) as? Intent ?: return@hookBefore
-                    intent.getStringExtra(BuildConfig.TAG) ?: return@hookBefore
-                    intent.removeExtra(BuildConfig.TAG)
+                    intent.getStringExtra(BuildFingerprint.intentKey) ?: return@hookBefore
+                    intent.removeExtra(BuildFingerprint.intentKey)
                     openSettingsDialog(activity)
                 }
         }

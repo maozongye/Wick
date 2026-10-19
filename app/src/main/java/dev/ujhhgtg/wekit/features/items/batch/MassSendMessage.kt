@@ -26,14 +26,13 @@ import dev.ujhhgtg.wekit.ui.content.DefaultColumn
 import dev.ujhhgtg.wekit.ui.content.TextButton
 import dev.ujhhgtg.wekit.ui.content.m3.RadioButtonWidget
 import dev.ujhhgtg.wekit.ui.utils.showComposeDialog
+import dev.ujhhgtg.wekit.utils.BehaviorPacing
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.android.showToast
 import dev.ujhhgtg.wekit.utils.android.showToastSuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 object MassSendMessage : ClickableFeature() {
 
@@ -42,12 +41,20 @@ object MassSendMessage : ClickableFeature() {
     override val categoryIds = listOf(FeatureCategoryIds.BATCH)
     override val descriptionRes = R.string.feature_mass_send_message_description
 
+    override val automationRisk = true
+
     private const val TAG = "MassSendMessage"
 
     override val noSwitchWidget = true
 
-    /** Space out sends to avoid WeChat's server-side rate limiting. */
-    private const val SEND_INTERVAL_MS = 800L
+    /**
+     * Humanised pacing and quotas for batch sends. Fixed intervals are a bot signature, and an
+     * unbounded batch burst is the fastest way to a server-side restriction.
+     */
+    private const val SEND_MEDIAN_MS = 4_000L
+    private const val SEND_WINDOW_LIMIT = 20
+    private const val SEND_WINDOW_MS = 30 * 60 * 1000L
+    private const val SEND_DAILY_LIMIT = 200
 
     private enum class SendMode(
         @StringRes val displayNameRes: Int,
@@ -153,12 +160,17 @@ object MassSendMessage : ClickableFeature() {
 
     private fun sendToAll(wxIds: Set<String>, mode: SendMode, text: String) {
         CoroutineScope(Dispatchers.IO).launch {
+            val allowed = wxIds.takeWhile {
+                BehaviorPacing.reserve("mass_send", SEND_WINDOW_LIMIT, SEND_WINDOW_MS) &&
+                    BehaviorPacing.reserveDaily("mass_send", SEND_DAILY_LIMIT)
+            }
+            val remainingCount = wxIds.size - allowed.size
             showToastSuspend(
                 localizedBatchQuantity(R.plurals.batch_mass_send_progress, wxIds.size, wxIds.size),
             )
 
             var success = 0
-            wxIds.forEachIndexed { index, wxId ->
+            allowed.forEachIndexed { index, wxId ->
                 val sent = runCatching {
                     when (mode) {
                         SendMode.TEXT -> WeMessageApi.sendText(wxId, text)
@@ -169,7 +181,11 @@ object MassSendMessage : ClickableFeature() {
                     false
                 }
                 if (sent) success++
-                if (index < wxIds.size - 1) delay(SEND_INTERVAL_MS.milliseconds)
+                if (index < allowed.size - 1) BehaviorPacing.pause(SEND_MEDIAN_MS)
+            }
+
+            if (remainingCount > 0) {
+                WeLogger.w(TAG, "mass send quota reached; $remainingCount of ${wxIds.size} recipients were skipped")
             }
 
             showToastSuspend(

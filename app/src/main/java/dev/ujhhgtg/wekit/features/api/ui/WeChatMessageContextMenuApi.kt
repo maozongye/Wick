@@ -25,11 +25,12 @@ import androidx.compose.ui.unit.dp
 import dev.ujhhgtg.reflekt.reflekt
 import dev.ujhhgtg.reflekt.utils.isSubclassOf
 import dev.ujhhgtg.wekit.R
+import dev.ujhhgtg.wekit.i18n.HostLocalizedStrings
 import dev.ujhhgtg.wekit.dexkit.abc.IResolveDex
 import dev.ujhhgtg.wekit.dexkit.dsl.dexMethod
 import dev.ujhhgtg.wekit.features.api.core.WeMessageApi
 import dev.ujhhgtg.wekit.features.api.core.models.MessageInfo
-import dev.ujhhgtg.wekit.features.core.ApiFeature
+import dev.ujhhgtg.wekit.features.core.LazyFeature
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
 import dev.ujhhgtg.wekit.features.items.chat.MergeChatMessageContextMenuItems
 import dev.ujhhgtg.wekit.features.items.chat.localizedChatString
@@ -46,7 +47,7 @@ import dev.ujhhgtg.wekit.utils.android.showToast
 import java.lang.ref.WeakReference
 import java.lang.reflect.Modifier as JavaModifier
 
-object WeChatMessageContextMenuApi : ApiFeature(), IResolveDex {
+object WeChatMessageContextMenuApi : LazyFeature(), IResolveDex {
 
     override val technicalId = "聊天界面消息菜单扩展"
     override val nameRes = R.string.feature_we_chat_message_context_menu_api_name
@@ -102,6 +103,9 @@ object WeChatMessageContextMenuApi : ApiFeature(), IResolveDex {
 
     fun addProvider(provider: IMenuItemsProvider) {
         providers += provider
+        // First provider arms the API: until something wants menu items there is no reason
+        // to hold a hook on the chat menu builder.
+        arm()
     }
 
     fun removeProvider(provider: IMenuItemsProvider) {
@@ -262,8 +266,8 @@ object WeChatMessageContextMenuApi : ApiFeature(), IResolveDex {
                 setImageDrawable(ExtensionDrawable())
                 scaleType = ImageView.ScaleType.CENTER
                 setBackgroundResource(0)
-                contentDescription = "WeKit"
-                tooltipText = "WeKit"
+                contentDescription = menuLabel()
+                tooltipText = menuLabel()
                 bar.setTag(R.id.wekit_multi_select_button, this)
             }
         button.setOnClickListener { view ->
@@ -295,7 +299,7 @@ object WeChatMessageContextMenuApi : ApiFeature(), IResolveDex {
         }) View.VISIBLE else View.GONE
     }
 
-    override fun onEnable() {
+    override fun installHooks() {
         methodCreateMenu.hookBefore {
             val menu = args[0]!!
 
@@ -319,7 +323,7 @@ object WeChatMessageContextMenuApi : ApiFeature(), IResolveDex {
                 if (MergeChatMessageContextMenuItems.isEnabled) {
                     // collapse everything into a single "WeKit" entry backed by a Compose dialog
                     if (applicableItems.isNotEmpty()) {
-                        addMenuItem.invoke(MERGED_MENU_ITEM_ID, "WeKit", ExtensionIcon)
+                        addMenuItem.invoke(MERGED_MENU_ITEM_ID, menuLabel(), ExtensionIcon)
                     }
                 } else {
                     for (item in applicableItems) {
@@ -572,8 +576,16 @@ object WeChatMessageContextMenuApi : ApiFeature(), IResolveDex {
     }
 
     override fun onDisable() {
+        super.onDisable()
         currentViewRef = null
-        // Hook 已被 unhookAll 撤销，重新启用时需要允许再次注册
+        // Hooks were revoked by unhookAll; allow re-registration on the next arm.
         menuDismissHooked = false
     }
+
+    /**
+     * The merged-menu entry label. Read through the resource system so lsparanoid encrypts it
+     * in protected builds instead of leaving a plain "WeKit" literal in the DEX.
+     */
+    private fun menuLabel(): String = HostLocalizedStrings.get(R.string.feature_we_chat_message_context_menu_api_name)
+
 }

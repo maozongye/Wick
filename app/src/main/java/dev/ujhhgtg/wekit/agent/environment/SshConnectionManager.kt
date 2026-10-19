@@ -208,7 +208,7 @@ class SshConnectionManager(
         }
         val slash = path.lastIndexOf('/')
         val parent = if (slash < 0) "." else path.substring(0, slash).ifEmpty { "/" }
-        val temporary = "$parent/.weagent-edit-${java.util.UUID.randomUUID()}.tmp"
+        val temporary = "$parent/${AgentPaths.editTempPrefix}${java.util.UUID.randomUUID()}.tmp"
         try {
             sftp.setUseWriteFlushWorkaround(true)
             sftp.put(ByteArrayInputStream(updated), temporary, ChannelSftp.OVERWRITE)

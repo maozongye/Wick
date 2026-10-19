@@ -26,7 +26,7 @@ for entry in module.prop customize.sh uninstall.sh sepolicy.rule config.sh actio
   webroot/js/app.js webroot/js/kernelsu.js \
   META-INF/com/google/android/update-binary META-INF/com/google/android/updater-script \
   AndroidManifest.xml classes.dex resources.arsc \
-  lib/arm64-v8a/libwekit_native.so lib/arm64-v8a/libwekit_zygisk.so
+  lib/arm64-v8a/libwick_native.so lib/arm64-v8a/libwick_zygisk.so
 do
   # BusyBox unzip may return success when a requested name matches no entry.
   # All required names are fixed and contain no whitespace.
@@ -43,12 +43,12 @@ do
   unzip -o "$ZIPFILE" "$entry" -d "$MODPATH" >/dev/null || abort "! 无法解压 $entry / Cannot extract $entry"
 done
 mkdir -p "$MODPATH/zygisk" || abort "! 无法创建 Zygisk 目录 / Cannot create Zygisk directory"
-unzip -p "$ZIPFILE" lib/arm64-v8a/libwekit_zygisk.so > "$TMPDIR/wekit-zygisk.so" ||
+unzip -p "$ZIPFILE" lib/arm64-v8a/libwick_zygisk.so > "$TMPDIR/wick-zygisk.so" ||
   abort "! 无法解压 Zygisk 原生库 / Cannot extract Zygisk library"
 
 # Compare bytes with the active module, never a previous modules_update candidate.
 # Do this before publishing the new library in case MODPATH is the active path.
-ACTIVE_MODULE_DIR=/data/adb/modules/wekit_zygisk
+ACTIVE_MODULE_DIR=/data/adb/modules/wick_zygisk
 if [ ! -f "$ACTIVE_MODULE_DIR/zygisk/arm64-v8a.so" ]; then
   NATIVE_UPDATE=first_install
 elif [ -e "$ACTIVE_MODULE_DIR/disable" ] || [ -e "$ACTIVE_MODULE_DIR/remove" ]; then
@@ -82,7 +82,7 @@ set_perm "$MODPATH/uninstall.sh" 0 0 0755
 
 OLD_MODULE_DIR=/data/adb/modules/wekit
 OLD_TARGETS_FILE=/data/adb/wekit/injection-targets.tsv
-NEW_STATE_DIR=/data/adb/wekit_zygisk
+NEW_STATE_DIR=/data/adb/wick_zygisk
 NEW_TARGETS_FILE=$NEW_STATE_DIR/injection-targets.tsv
 
 if [ -f "$OLD_TARGETS_FILE" ] || [ -d "$OLD_MODULE_DIR" ]; then

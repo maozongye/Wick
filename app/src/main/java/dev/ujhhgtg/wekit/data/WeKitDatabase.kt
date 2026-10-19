@@ -29,6 +29,7 @@ import dev.ujhhgtg.wekit.data.entity.MomentAutomationContentTypeEntity
 import dev.ujhhgtg.wekit.data.entity.collectionSchemaSql
 import dev.ujhhgtg.wekit.data.entity.simpleStructuredSchemaSql
 import dev.ujhhgtg.wekit.data.structured.automationSchemaSql
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import dev.ujhhgtg.wekit.agent.data.dao.BridgeToolAuditDao
 import dev.ujhhgtg.wekit.agent.data.dao.ConditionalPromptDao
 import dev.ujhhgtg.wekit.data.dao.DocumentDao
@@ -164,7 +165,13 @@ abstract class WeKitDatabase : RoomDatabase() {
     companion object {
         private const val TAG = "WeKitDatabase"
 
-        const val FILE_NAME = "wekit.db"
+        /** Historical file name, only ever used to locate a pre-hardening database. */
+        private const val LEGACY_FILE_NAME = "wekit.db"
+
+        /** Derived so the database name alone never identifies the module. */
+        val FILE_NAME: String
+            get() = BuildFingerprint.dbName
+
         const val SCHEMA_VERSION = 22
 
         /** Location of the unified database after the path migration has completed. */
@@ -379,7 +386,7 @@ abstract class WeKitDatabase : RoomDatabase() {
 
         private fun build(): WeKitDatabase {
             val external = LegacyPaths.externalModuleRoot.resolve("agent/weagent.db").toFile()
-            val oldUnified = KnownPaths.moduleRoot.resolve("wekit.db").toFile()
+            val oldUnified = KnownPaths.moduleRoot.resolve(LEGACY_FILE_NAME).toFile()
             val oldPrivate = LegacyPaths.privateWeAgentDatabase.toFile()
             val movedPrivate = KnownPaths.moduleRoot.resolve("agent/weagent.db").toFile()
             val source = when {
@@ -388,7 +395,7 @@ abstract class WeKitDatabase : RoomDatabase() {
                     .filter(File::isFile)
                     .maxByOrNull(File::lastModified)
             }
-            val destination = KnownPaths.moduleRoot.resolve("wekit.db").toFile()
+            val destination = KnownPaths.moduleRoot.resolve(FILE_NAME).toFile()
             val sourceFile = source ?: external
             val relocator = LegacyDatabaseRelocator(sourceFile, destination) { sourceFile ->
                 val sourceDb = android.database.sqlite.SQLiteDatabase.openDatabase(
@@ -437,7 +444,7 @@ abstract class WeKitDatabase : RoomDatabase() {
                     WeLogger.e(TAG, "migrated database failed to open; rolling back", t)
                     runCatching { database.close() }
                     relocator.rollbackLocked(prepared)
-                    throw IllegalStateException("Unable to open the unified WeKit database", t)
+                    throw IllegalStateException("Unable to open the unified Wick database", t)
                 }
             }
         }

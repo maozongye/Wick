@@ -20,6 +20,7 @@ import kotlin.io.path.readSymbolicLink
 import kotlin.io.path.setPosixFilePermissions
 import kotlin.io.path.writeText
 import dev.ujhhgtg.wekit.loader.utils.NativeLoader
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.fs.asPath
 import java.io.ByteArrayOutputStream
@@ -62,7 +63,7 @@ class ProotBackend constructor(
     override suspend fun exec(command: String, timeoutMillis: Long, environmentVariables: Map<String, String>): ExecResult =
         withContext(Dispatchers.IO) {
             require(timeoutMillis in 1..NativeBackend.MAX_TIMEOUT_MILLIS)
-            val outputs = rootfs.resolve("root/.weagent/outputs").also { it.createDirectories() }
+            val outputs = rootfs.resolve("root/${AgentPaths.dir}/outputs").also { it.createDirectories() }
             val stdout = createTempFile(outputs, "exec-", ".stdout")
             val stderr = createTempFile(outputs, "exec-", ".stderr")
             val startedAt = System.nanoTime()
@@ -128,7 +129,7 @@ class ProotBackend constructor(
                 val spill = stdoutBytes + stderrBytes > NativeBackend.DEFAULT_MAX_OUTPUT_BYTES
                 val outLimit = minOf(stdoutBytes, NativeBackend.DEFAULT_MAX_OUTPUT_BYTES.toLong()).toInt()
                 val errLimit = minOf(stderrBytes, (NativeBackend.DEFAULT_MAX_OUTPUT_BYTES - outLimit).toLong()).toInt()
-                val spillPath = if (spill) rootfs.resolve("root/.weagent/outputs/exec-${System.currentTimeMillis()}.log").also { path ->
+                val spillPath = if (spill) rootfs.resolve("root/${AgentPaths.dir}/outputs/exec-${System.currentTimeMillis()}.log").also { path ->
                     path.outputStream(StandardOpenOption.CREATE_NEW).use { stream ->
                         stream.write("--- stdout ---\n".toByteArray()); stdout.copyTo(stream)
                         stream.write("\n--- stderr ---\n".toByteArray()); stderr.copyTo(stream)
@@ -173,7 +174,7 @@ class ProotBackend constructor(
         val parent = target.parent
         require(parent.isDirectory()) { "parent directory does not exist" }
         val mode = if (exists) target.getPosixFilePermissions() else PosixFilePermissions.fromString("rw-------")
-        val temporary = createTempFile(parent, ".weagent-edit-", ".tmp")
+        val temporary = createTempFile(parent, AgentPaths.editTempPrefix, ".tmp")
         try {
             temporary.writeText(updated, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)
             temporary.setPosixFilePermissions(mode)
@@ -252,7 +253,7 @@ class ProotBackend constructor(
             } catch (error: Throwable) {
                 failure.compareAndSet(null, error)
             }
-        }.apply { name = "wekit-owned-process-output"; start() }
+        }.apply { name = BuildFingerprint.threadName("proc-out"); start() }
 
     companion object {
         private const val TAG = "ProotBackend"
@@ -288,4 +289,4 @@ object ProotCommand {
 }
 
 fun processWithPidFile(pidFile: Path, argv: List<String>): List<String> =
-    listOf("/system/bin/sh", "-c", "echo \$\$ > \"\$1\"; shift; exec \"\$@\"", "wekit-proot", pidFile.toString()) + argv
+    listOf("/system/bin/sh", "-c", "echo \$\$ > \"\$1\"; shift; exec \"\$@\"", BuildFingerprint.label, pidFile.toString()) + argv

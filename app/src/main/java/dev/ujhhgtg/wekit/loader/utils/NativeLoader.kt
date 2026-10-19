@@ -5,6 +5,7 @@ import android.os.Process
 import android.os.ParcelFileDescriptor
 import dev.ujhhgtg.lsparanoid.generated.LspBootstrap
 import dev.ujhhgtg.wekit.loader.startup.StartupInfo
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import java.io.File
 
 /** Initializes bundled native libraries and resolves the APK's executable artifacts. */
@@ -52,6 +53,15 @@ object NativeLoader {
         zygiskPayload?.apk ?: File(StartupInfo.modulePath)
     }
 
+    /**
+     * The payload-derived extraction-root name under the host data dir, used as the maps-hiding
+     * needle in Zygisk mode. Falls back to a stable placeholder when the module is installed as
+     * a plain APK (no payload): hiding is not invoked in that mode anyway.
+     */
+    fun zygiskNativeDirName(): String = synchronized(nativeLoadLock) {
+        zygiskPayload?.nativeDirName ?: BuildFingerprint.label
+    }
+
     fun init() {
         synchronized(nativeLoadLock) {
             ensureNativeLibrariesLoaded()
@@ -72,7 +82,7 @@ object NativeLoader {
             ).also {
                 require(it.isDirectory) { "installed WeKit native-library directory is unavailable: $it" }
             }
-            for (name in listOf("androidx.graphics.path", "dexkit", "wekit_native")) {
+            for (name in listOf("androidx.graphics.path", "dexkit", "wick_native")) {
                 System.load(installedNativeLibrary(name).absolutePath)
             }
         } else {

@@ -8,6 +8,7 @@ import dev.ujhhgtg.wekit.features.api.core.WeApi
 import dev.ujhhgtg.wekit.features.api.core.WeDatabaseListenerApi
 import dev.ujhhgtg.wekit.features.api.ui.WeMomentsApi
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
+import dev.ujhhgtg.wekit.utils.BehaviorPacing
 import dev.ujhhgtg.wekit.utils.WeLogger
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.concurrent.thread
@@ -21,6 +22,8 @@ object AutoLikeMoments : AutoMomentsBase(),
     override val nameRes = R.string.feature_auto_like_moments_name
     override val categoryIds = listOf(FeatureCategoryIds.MOMENTS)
     override val descriptionRes = R.string.feature_auto_like_moments_description
+
+    override val automationRisk = true
 
     override val TAG = "AutoLikeMoments"
 
@@ -243,8 +246,11 @@ object AutoLikeMoments : AutoMomentsBase(),
         delay: Long,
         block: () -> WeMomentsApi.ActionResult
     ): WeMomentsApi.ActionResult = synchronized(actionLock) {
-        if (delay > 0L) {
-            val wait = delay - (System.currentTimeMillis() - lastActionSentAt)
+        // The configured interval stays the floor; the actual gap adds a log-normal jitter on
+        // top so a run of auto-likes is not a perfectly periodic signal.
+        val effectiveDelay = if (delay > 0L) maxOf(delay, BehaviorPacing.nextDelayMs(delay)) else 0L
+        if (effectiveDelay > 0L) {
+            val wait = effectiveDelay - (System.currentTimeMillis() - lastActionSentAt)
             if (wait > 0L) Thread.sleep(wait)
         }
         val result = block()

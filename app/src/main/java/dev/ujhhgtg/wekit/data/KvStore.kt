@@ -413,6 +413,12 @@ object KvStore {
             }
             cleanupOrphanStringSetMembers()
         }
+        // Every entry is now durably in the Room store. The pair is a one-string fingerprint
+        // sitting inside the host's own scanned storage area — drop it once nothing reads it.
+        runCatching {
+            Files.deleteIfExists(file.toPath())
+            Files.deleteIfExists(crcFile.toPath())
+        }.onFailure { WeLogger.w(TAG, "failed to remove migrated legacy MMKV pair; will retry on next startup", it) }
     }
 
     private const val TYPE_BOOL = "bool"

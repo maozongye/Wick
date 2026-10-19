@@ -14,6 +14,8 @@ import dev.ujhhgtg.wekit.features.api.net.models.protobuf.OpLog
 import dev.ujhhgtg.wekit.features.api.net.models.protobuf.UserNameProto
 import dev.ujhhgtg.wekit.features.core.ApiFeature
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
+import dev.ujhhgtg.wekit.utils.RiskControlGate
+import dev.ujhhgtg.wekit.utils.RiskControlSignal
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.reflection.BString
 import dev.ujhhgtg.wekit.utils.reflection.int
@@ -129,7 +131,17 @@ object WeContactApi : ApiFeature(), IResolveDex {
                 val errType = args[1] as Int
                 val errCode = args[2] as Int
                 val errMsg = args[3] as String?
-                pending.deferred.complete(classifyRelationshipProbe(errType, errCode, errMsg))
+                val outcome = classifyRelationshipProbe(errType, errCode, errMsg)
+                // Server-side risk signals observed through probing feed the global circuit
+                // breaker, independent of whether any automation feature is currently on.
+                when (outcome) {
+                    is RelationshipProbeResult.RateLimited ->
+                        RiskControlGate.record(RiskControlSignal.RATE_LIMITED)
+                    is RelationshipProbeResult.AccountRestricted ->
+                        RiskControlGate.record(RiskControlSignal.ACCOUNT_RESTRICTED)
+                    else -> {}
+                }
+                pending.deferred.complete(outcome)
             }
 
         WeMessageApi.methodMsgInfoStorageInsertMessage.hookBefore {

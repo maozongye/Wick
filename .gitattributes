@@ -1,1 +1,5 @@
 /patches/proot/*.patch -whitespace
+# Patches and shell scripts must keep LF endings; CRLF breaks `git apply` in the
+# PRoot worktree flow and shell execution in Git Bash / WSL.
+*.patch text eol=lf
+*.sh text eol=lf

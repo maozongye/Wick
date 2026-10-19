@@ -83,7 +83,7 @@ static ABI_TABLE: &[AbiSpec] = &[AbiSpec {
 static RELEASE_ABIS: &[&str] = &["arm64-v8a"];
 
 const ZYGISK_CARGO_PACKAGE: &str = "wekit-zygisk";
-const ZYGISK_MODULE_ID: &str = "wekit_zygisk";
+const ZYGISK_MODULE_ID: &str = "wick_zygisk";
 // ── CLI ────────────────────────────────────────────────────────────────────────
 
 #[derive(Parser)]
@@ -814,9 +814,9 @@ fn task_build_native(abi_args: &[String]) -> Result<()> {
         let so_src = root
             .join("target")
             .join(spec.cargo_triple)
-            .join("release/libwekit_native.so");
+            .join("release/libwick_native.so");
         let so_dst_dir = jni_libs_dir(&root).join(spec.android_name);
-        let so_dst = so_dst_dir.join("libwekit_native.so");
+        let so_dst = so_dst_dir.join("libwick_native.so");
 
         fs::create_dir_all(&so_dst_dir)
             .with_context(|| format!("could not create {}", so_dst_dir.display()))?;
@@ -1017,8 +1017,8 @@ fn validate_module_apk(path: &Path) -> Result<()> {
         "customize.sh",
         "META-INF/com/google/android/update-binary",
         "META-INF/com/google/android/updater-script",
-        "lib/arm64-v8a/libwekit_zygisk.so",
-        "lib/arm64-v8a/libwekit_native.so",
+        "lib/arm64-v8a/libwick_zygisk.so",
+        "lib/arm64-v8a/libwick_native.so",
     ] {
         let mut entry = archive.by_name(name).with_context(|| {
             format!(
@@ -1150,7 +1150,7 @@ fn install_zygisk_apk(
     let manager = validate_root_manager(manager)?;
     // The bytes are the signed APK; only the device-side extension changes.
     let remote_zip = format!("/data/local/tmp/wekit-module-{}.zip", std::process::id());
-    let remote_script = "/data/local/tmp/install_wekit_zygisk.sh";
+    let remote_script = "/data/local/tmp/install_wick_zygisk.sh";
     let script = zygisk_dir(root).join("scripts/install_module.sh");
     run_adb(
         root,

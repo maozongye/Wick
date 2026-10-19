@@ -1,4 +1,4 @@
-package dev.ujhhgtg.wekit.features.items.payment
+package dev.ujhhgtg.wekit.features.items.automation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -52,7 +52,7 @@ import dev.ujhhgtg.wekit.ui.content.m3.SwitchWidget
  * single [dev.ujhhgtg.wekit.ui.utils.showComposeDialog] window, so text values swap the dialog
  * content instead of opening a second window.
  */
-class PaymentTextEditMode(
+class AutomationTextEditMode(
     val title: String,
     val initial: String,
     val keyboardType: KeyboardType = KeyboardType.Text,
@@ -63,8 +63,8 @@ class PaymentTextEditMode(
 )
 
 @Composable
-fun PaymentTextEditDialog(
-    mode: PaymentTextEditMode,
+fun AutomationTextEditDialog(
+    mode: AutomationTextEditMode,
     onClose: () -> Unit,
 ) {
     var draft by remember(mode) { mutableStateOf(mode.initial) }
@@ -99,7 +99,7 @@ fun PaymentTextEditDialog(
 
 /** Navigation entry inside a payment settings dialog, e.g. "Global settings" with a chevron. */
 @Composable
-fun PaymentNavigationRow(
+fun AutomationNavigationRow(
     title: String,
     description: String,
     onClick: () -> Unit,
@@ -125,7 +125,7 @@ fun PaymentNavigationRow(
  * parent summary, activates on row tap, and exposes a reset action once activated.
  */
 @Composable
-fun PaymentRuleRow(
+fun AutomationRuleRow(
     title: String,
     summary: String,
     checked: Boolean,
@@ -181,9 +181,9 @@ fun PaymentRuleRow(
     }
 }
 
-/** Switch-less variant of [PaymentRuleRow] for rules whose value is a choice, not a toggle. */
+/** Switch-less variant of [AutomationRuleRow] for rules whose value is a choice, not a toggle. */
 @Composable
-fun PaymentModeRuleRow(
+fun AutomationModeRuleRow(
     title: String,
     summary: String,
     overridden: Boolean?,
@@ -210,9 +210,9 @@ fun PaymentModeRuleRow(
     )
 }
 
-/** Row showing a stored value that is edited through an in-dialog [PaymentTextEditMode]. */
+/** Row showing a stored value that is edited through an in-dialog [AutomationTextEditMode]. */
 @Composable
-fun PaymentValueRow(
+fun AutomationValueRow(
     title: String,
     value: String,
     onClick: () -> Unit,
@@ -231,7 +231,7 @@ fun PaymentValueRow(
 }
 
 @Composable
-fun PaymentErrorRow(message: String) {
+fun AutomationErrorRow(message: String) {
     BaseWidget(iconPlaceholder = false, title = message, isError = true)
 }
 
@@ -277,7 +277,7 @@ fun SegmentedColumnScope.keywordItems(
     visible: Boolean,
     modes: List<AutomationKeywordMode>,
     onChange: (AutomationKeywordRule) -> Unit,
-    onEditText: (PaymentTextEditMode) -> Unit,
+    onEditText: (AutomationTextEditMode) -> Unit,
     inlineTextFields: Boolean = false,
 ) {
     item(key = "${keyPrefix}_mode", animatedVisibility = visible) {
@@ -332,14 +332,14 @@ fun SegmentedColumnScope.keywordItems(
                     )
                 }
             } else {
-                PaymentValueRow(
+                AutomationValueRow(
                     title = regexTitle,
                     value = rule.regex,
                     enabled = editable,
                     valueHint = stringResource(R.string.automation_regex_empty_summary),
                     onClick = {
                         onEditText(
-                            PaymentTextEditMode(
+                            AutomationTextEditMode(
                                 title = regexTitle,
                                 initial = rule.regex,
                                 validator = { input ->
@@ -396,13 +396,13 @@ fun SegmentedColumnScope.keywordItems(
                 )
             }
         } else {
-            PaymentValueRow(
+            AutomationValueRow(
                 title = addTitle,
                 value = "",
                 enabled = editable,
                 onClick = {
                     onEditText(
-                        PaymentTextEditMode(
+                        AutomationTextEditMode(
                             title = addTitle,
                             initial = "",
                             onCommit = { input ->
@@ -429,20 +429,20 @@ fun SegmentedColumnScope.delayItems(
     maxDigits: Int,
     onBaseChange: (String) -> Unit,
     onRandomRangeChange: (String) -> Unit,
-    onEditText: (PaymentTextEditMode) -> Unit,
+    onEditText: (AutomationTextEditMode) -> Unit,
 ) {
     val digitFilter: (String) -> String = { it.filter(Char::isDigit).take(maxDigits) }
 
     item(key = "delay_base", animatedVisibility = visible) {
         val baseTitle = stringResource(R.string.automation_base_delay_ms)
-        PaymentValueRow(
+        AutomationValueRow(
             title = baseTitle,
             value = baseMs,
             enabled = editable,
             valueHint = "0",
             onClick = {
                 onEditText(
-                    PaymentTextEditMode(
+                    AutomationTextEditMode(
                         title = baseTitle,
                         initial = baseMs,
                         keyboardType = KeyboardType.Number,
@@ -455,14 +455,14 @@ fun SegmentedColumnScope.delayItems(
     }
     item(key = "delay_random", animatedVisibility = visible) {
         val randomTitle = stringResource(R.string.automation_random_delay_ms)
-        PaymentValueRow(
+        AutomationValueRow(
             title = randomTitle,
             value = randomRangeMs,
             enabled = editable,
             valueHint = "0",
             onClick = {
                 onEditText(
-                    PaymentTextEditMode(
+                    AutomationTextEditMode(
                         title = randomTitle,
                         initial = randomRangeMs,
                         keyboardType = KeyboardType.Number,

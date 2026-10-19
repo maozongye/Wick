@@ -32,8 +32,24 @@ private const val RESOLVER_INTERFACE = "$PACKAGE_NAME.dexkit.abc.IResolveDex"
 
 class FeaturesKspProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
-        FeaturesScanner(environment.codeGenerator, environment.logger)
+        FeaturesScanner(
+            environment.codeGenerator,
+            environment.logger,
+            excludedFeaturePackages = environment.options[OPTION_EXCLUDED_PACKAGES]
+                .orEmpty()
+                .split(',')
+                .map(String::trim)
+                .filter(String::isNotEmpty),
+        )
 }
+
+/**
+ * Comma-separated `dev.ujhhgtg.wekit.features.items.*` package prefixes to omit from the
+ * generated feature registry. Set by the `-PwekitMinimal=true` Gradle property so a minimal
+ * build does not merely disable debug features — it never references their classes, letting
+ * R8 tree-shake them out of the artifact entirely.
+ */
+const val OPTION_EXCLUDED_PACKAGES = "wekit.excludedFeaturePackages"
 
 /**
  * Generates runtime registries for source Feature and ExtensionPack objects.
@@ -45,6 +61,7 @@ class FeaturesKspProvider : SymbolProcessorProvider {
 class FeaturesScanner(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
+    private val excludedFeaturePackages: List<String> = emptyList(),
 ) : SymbolProcessor {
     private var generated = false
 
@@ -59,6 +76,10 @@ class FeaturesScanner(
             .toList()
         val features = objects
             .filter { it.isSubtypeOf(BASE_FEATURE) }
+            .filter { symbol ->
+                val name = symbol.qualifiedName?.asString().orEmpty()
+                excludedFeaturePackages.none { prefix -> name.startsWith(prefix) }
+            }
             .sortedBy { it.qualifiedName!!.asString() }
         val extensionPacks = objects
             .filter { it.isSubtypeOf(EXTENSION_PACK) }

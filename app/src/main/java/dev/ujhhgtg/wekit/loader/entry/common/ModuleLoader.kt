@@ -5,6 +5,7 @@ import dev.ujhhgtg.wekit.loader.abc.IHookBridge
 import dev.ujhhgtg.wekit.loader.abc.ILoaderService
 import dev.ujhhgtg.wekit.loader.startup.UnifiedEntryPoint
 import dev.ujhhgtg.wekit.loader.utils.NativeLoader
+import dev.ujhhgtg.wekit.BuildConfig
 import dev.ujhhgtg.wekit.utils.WeLogger
 
 object ModuleLoader {
@@ -31,7 +32,7 @@ object ModuleLoader {
             NativeLoader.initDecoder(modulePath)
         } catch (t: Throwable) {
             // The normal logger may itself contain protected strings.
-            Log.e("WeKit", "string decoder bootstrap failed", t)
+            Log.e(BuildConfig.INTERNAL_TAG, "string decoder bootstrap failed", t)
             return@synchronized false
         }
 

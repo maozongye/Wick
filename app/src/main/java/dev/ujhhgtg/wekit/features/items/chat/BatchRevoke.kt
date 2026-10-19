@@ -8,8 +8,12 @@ import dev.ujhhgtg.wekit.features.api.ui.WeChatMessageContextMenuApi
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
 import dev.ujhhgtg.wekit.features.core.SwitchFeature
 import dev.ujhhgtg.wekit.ui.utils.UndoIcon
+import dev.ujhhgtg.wekit.utils.BehaviorPacing
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.android.showToast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object BatchRevoke : SwitchFeature(), WeChatMessageContextMenuApi.IMenuItemsProvider {
 
@@ -17,6 +21,16 @@ object BatchRevoke : SwitchFeature(), WeChatMessageContextMenuApi.IMenuItemsProv
     override val nameRes = R.string.feature_batch_revoke_name
     override val categoryIds = listOf(FeatureCategoryIds.CHAT)
     override val descriptionRes = R.string.feature_batch_revoke_description
+
+    override val automationRisk = true
+
+    private const val TAG = "BatchRevoke"
+
+    /** Humanised pacing and hard quotas for burst revocations. */
+    private const val REVOKE_MEDIAN_MS = 3_000L
+    private const val REVOKE_WINDOW_LIMIT = 20
+    private const val REVOKE_WINDOW_MS = 30 * 60 * 1000L
+    private const val REVOKE_DAILY_LIMIT = 100
 
     override fun onEnable() {
         WeChatMessageContextMenuApi.addProvider(this)
@@ -36,21 +50,37 @@ object BatchRevoke : SwitchFeature(), WeChatMessageContextMenuApi.IMenuItemsProv
                     isSupported = { true },
                     onClick = { view, _, msgs ->
                         // yeah i know this is very cursed; this is the sequelae of writing too much python
-                        val succeeded = msgs.sumOf { msg ->
-                            runCatching { WeMessageApi.revokeMsg(msg); 1 }
-                                .getOrElse {
-                                    WeLogger.e("BatchRevoke", "failed to revoke msgId=${msg.id}", it); 0
-                                }
+                        // Burst revocations used to fire back-to-back on the main thread, which is
+                        // both a fixed-period bot signature and an ANR risk; pace them on IO instead.
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val allowed = msgs.takeWhile {
+                                BehaviorPacing.reserve("revoke", REVOKE_WINDOW_LIMIT, REVOKE_WINDOW_MS) &&
+                                    BehaviorPacing.reserveDaily("revoke", REVOKE_DAILY_LIMIT)
+                            }
+                            if (allowed.size < msgs.size) {
+                                WeLogger.w(
+                                    TAG,
+                                    "revoke quota reached; ${msgs.size - allowed.size} of ${msgs.size} were skipped",
+                                )
+                            }
+                            var succeeded = 0
+                            allowed.forEachIndexed { index, msg ->
+                                succeeded += runCatching { WeMessageApi.revokeMsg(msg); 1 }
+                                    .getOrElse {
+                                        WeLogger.e(TAG, "failed to revoke msgId=${msg.id}", it); 0
+                                    }
+                                if (index < allowed.size - 1) BehaviorPacing.pause(REVOKE_MEDIAN_MS)
+                            }
+                            showToast(
+                                view.context,
+                                view.context.localizedChatQuantity(
+                                    R.plurals.chat_batch_revoke_result,
+                                    msgs.size,
+                                    succeeded,
+                                    msgs.size,
+                                ),
+                            )
                         }
-                        showToast(
-                            view.context,
-                            view.context.localizedChatQuantity(
-                                R.plurals.chat_batch_revoke_result,
-                                msgs.size,
-                                succeeded,
-                                msgs.size,
-                            ),
-                        )
                     }
                 )
             ) { _, _, _ ->

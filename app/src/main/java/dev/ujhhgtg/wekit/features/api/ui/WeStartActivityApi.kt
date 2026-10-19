@@ -9,6 +9,7 @@ import dev.ujhhgtg.wekit.features.core.ApiFeature
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
 import dev.ujhhgtg.wekit.utils.HookParam
 import dev.ujhhgtg.wekit.utils.WeLogger
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import java.util.concurrent.CopyOnWriteArrayList
 
 object WeStartActivityApi : ApiFeature() {
@@ -57,7 +58,7 @@ object WeStartActivityApi : ApiFeature() {
             return
         }
 
-        if (intent.getBooleanExtra(BuildConfig.TAG, false)) {
+        if (intent.getBooleanExtra(BuildFingerprint.intentKey, false)) {
             return
         }
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ujhhgtg.wekit.R
+import dev.ujhhgtg.wekit.constants.Preferences
 import dev.ujhhgtg.wekit.dexkit.abc.IResolveDex
 import dev.ujhhgtg.wekit.dexkit.cache.CloudDexResolver
 import dev.ujhhgtg.wekit.utils.WeLogger
@@ -81,14 +82,22 @@ fun DexResolver(
 
     fun startResolution() {
         val currentItems = pendingItems
-        phase = DialogPhase.DownloadingCloud
+        // Cloud resolution reaches github.com. It is opt-in: an offline-first module should
+        // resolve locally by default, and a standing outbound request tied to a fixed release
+        // URL is both a network fingerprint and a privacy cost the user never asked for.
+        val useCloud = Preferences.cloudDexResolution
+        phase = if (useCloud) DialogPhase.DownloadingCloud else DialogPhase.ResolvingLocal(currentItems.size)
         scope.launch {
-            val remainingItems = try {
-                CloudDexResolver.resolve(currentItems).remainingItems
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                WeLogger.e(TAG, "cloud resolution failed", error)
+            val remainingItems = if (useCloud) {
+                try {
+                    CloudDexResolver.resolve(currentItems).remainingItems
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    WeLogger.e(TAG, "cloud resolution failed", error)
+                    currentItems
+                }
+            } else {
                 currentItems
             }
             withContext(Dispatchers.Main.immediate) {

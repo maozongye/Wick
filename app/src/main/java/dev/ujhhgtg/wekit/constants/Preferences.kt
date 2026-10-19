@@ -6,6 +6,7 @@ object Preferences {
 
     const val VERBOSE_LOG = "verbose_log"
     const val NO_DEX_RESOLVE = "no_dex_resolve"
+    const val CLOUD_DEX_RESOLUTION = "cloud_dex_resolution"
     const val SHOW_STARTUP_TOAST = "toast_startup"
     const val RESET_DEX_ON_HOT_UPDATE = "reset_dex_on_hot_upd"
     const val MATCH_GENERIC_WXID_EXP = "match_generic_wxid"
@@ -33,6 +34,13 @@ object Preferences {
 
     var verboseLog by prefOption(VERBOSE_LOG, false)
     var noDexResolve by prefOption(NO_DEX_RESOLVE, false)
+
+    /**
+     * Download pre-resolved Dex targets from the public release page. Off by default: local
+     * DexKit resolution needs no network, and a fixed outbound request is a fingerprint as
+     * well as an unrequested privacy cost.
+     */
+    var cloudDexResolution by prefOption(CLOUD_DEX_RESOLUTION, false)
     var showStartupToast by prefOption(SHOW_STARTUP_TOAST, false)
     var resetDexCacheOnHotUpdate by prefOption(RESET_DEX_ON_HOT_UPDATE, false)
 

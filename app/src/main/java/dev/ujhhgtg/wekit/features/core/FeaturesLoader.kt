@@ -53,7 +53,14 @@ object FeaturesLoader {
                     "skipping ${allFeatures.size - featuresToStart.size} feature(s)",
             )
         }
-        val allDexItems = featuresToStart.filterIsInstance<IResolveDex>()
+        // Dex resolution is expensive and observable: it loads DexKit, walks every dex, and can
+        // trigger a resolve dialog or an outbound cloud request. Resolving targets for features
+        // the user never enabled buys nothing at runtime — a disabled SwitchFeature installs no
+        // hooks — so only the features that will actually start are resolved.
+        val dexCandidates = featuresToStart.filter { feature ->
+            feature !is SwitchFeature || feature.shouldEnableOnStartup
+        }
+        val allDexItems = dexCandidates.filterIsInstance<IResolveDex>()
 
         val outdatedItems = DexCacheManager.getOutdatedItems(allDexItems)
         val validItems = allDexItems - outdatedItems.toSet()

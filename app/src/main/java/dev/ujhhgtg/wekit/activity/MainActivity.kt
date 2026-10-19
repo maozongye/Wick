@@ -83,6 +83,7 @@ import dev.ujhhgtg.wekit.utils.hook_status.HookStatus
 import dev.ujhhgtg.wekit.utils.openInSystem
 import dev.ujhhgtg.wekit.utils.registerBshSnapshotDecompileLaunchers
 import dev.ujhhgtg.wekit.utils.serialization.DefaultJson
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 
 class MainActivity : ComponentActivity() {
 
@@ -588,7 +589,7 @@ class MainActivity : ComponentActivity() {
                             startActivity(dev.ujhhgtg.wekit.utils.android.Intent {
                                 setClassName(hostPkg, "${PackageNames.WECHAT}.ui.LauncherUI")
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                putExtra(BuildConfig.TAG, "1")
+                                putExtra(BuildFingerprint.intentKey, "1")
                             })
                             isLaunchingWeChat = true
                         } catch (e: Exception) {

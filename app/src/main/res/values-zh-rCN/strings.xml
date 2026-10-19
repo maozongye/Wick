@@ -12,10 +12,10 @@
     <string name="dialog_confirm">确定</string>
     <string name="dialog_close">关闭</string>
     <string name="accessibility_overflow_menu">更多选项</string>
-    <string name="module_app_sticker_import_invalid_caller">只允许从微信内的 WeKit 面板启动此操作</string>
+    <string name="module_app_sticker_import_invalid_caller">只允许从微信内的 Wick 面板启动此操作</string>
     <string name="manager_launch_opening_title">正在打开框架管理器…</string>
     <string name="manager_launch_failed_title">无法打开管理器</string>
-    <string name="manager_launch_invalid_caller">只允许从微信内的 WeKit 面板启动此操作</string>
+    <string name="manager_launch_invalid_caller">只允许从微信内的 Wick 面板启动此操作</string>
     <string name="manager_launch_root_required">打开 LSPosed 或 Vector 管理器需要 Root 权限</string>
     <string name="manager_launch_failed_message">两种受支持的管理器启动方式均执行失败</string>
     <string name="manager_launch_no_root_manager">未找到受支持的 Root 管理器</string>
@@ -106,7 +106,7 @@
     <string name="dex_cache_continue_local_resolution">继续解析</string>
     <string name="dex_cache_failure_detail">%1$d. %2$s\n   错误: %3$s\n\n</string>
     <string name="dex_cache_copy_error_information">复制错误信息</string>
-    <string name="dex_error_report_title">=== WeKit DEX 扫描错误报告 ===</string>
+    <string name="dex_error_report_title">=== Wick DEX 扫描错误报告 ===</string>
     <string name="dex_error_report_entry">%1$d. %2$s\n   错误信息: %3$s\n   堆栈跟踪:\n%4$s\n\n</string>
     <string name="location_picker_instruction">点击地图或下方坐标以选择虚拟位置</string>
     <string name="location_picker_title">地图选点</string>
@@ -227,8 +227,8 @@
     <string name="home_module_activated">模块已激活</string>
     <string name="home_device_info_title">设备信息</string>
     <string name="home_learn_more_title">了解更多</string>
-    <string name="home_learn_more_item_title">WeKit 文档</string>
-    <string name="home_learn_more_item_summary">了解如何配置和使用 WeKit</string>
+    <string name="home_learn_more_item_title">Wick 文档</string>
+    <string name="home_learn_more_item_summary">了解如何配置和使用 Wick</string>
     <string name="home_wechat_version">微信版本</string>
     <string name="home_module_version">模块版本</string>
     <string name="home_build_time">构建时间</string>
@@ -354,6 +354,9 @@
     <string name="settings_apply_to_wechat_summary">将自定义配色应用到微信本身</string>
     <string name="settings_safe_mode_title">安全模式</string>
     <string name="settings_safe_mode_summary">在不稳定环境中保守加载模块能力</string>
+    <string name="settings_risk_control_observed">已观察到风险信号，自动化功能处于监控状态。</string>
+    <string name="settings_risk_control_paused">检测到风控信号，自动化功能已暂停至 %1$s。</string>
+    <string name="settings_risk_control_cooldown">账号处于风控冷却期（至 %1$s），自动化功能已禁用。</string>
     <string name="action_reset">重置</string>
     <string name="action_clear">清除</string>
     <string name="update_checking">正在检查更新…</string>
@@ -363,7 +366,7 @@
     <string name="config_clearing">正在清除…</string>
     <string name="config_clear_success">清除成功!</string>
     <string name="cleanup_legacy_dialog_title">清理旧数据</string>
-    <string name="cleanup_legacy_dialog_message">确定删除迁移后保留在旧位置的 WeKit 文件吗？当前模块数据不会受到影响。</string>
+    <string name="cleanup_legacy_dialog_message">确定删除迁移后保留在旧位置的 Wick 文件吗？当前模块数据不会受到影响。</string>
     <string name="cleanup_legacy_success">旧数据清理成功!</string>
     <string name="update_available_title">检测到新版本</string>
     <string name="update_available_message">当前版本: %1$s\n新版本: %2$s\n是否下载并安装?</string>
@@ -383,7 +386,7 @@
     <string name="nuke_appearance_title">界面设置</string>
     <string name="nuke_about_title">关于模块</string>
     <string name="nuke_support_us_title">赞赏我们</string>
-    <string name="nuke_settings_title">WeKit 设置</string>
+    <string name="nuke_settings_title">Wick 设置</string>
     <string name="nuke_section_security">安全</string>
     <string name="nuke_section_general">通用</string>
     <string name="nuke_wechat_account">微信账号</string>
@@ -440,16 +443,16 @@
     <string name="nuke_update_installed">已安装</string>
     <string name="nuke_installed_version_details">版本代码 %1$d\n构建时间 %2$s</string>
     <string name="nuke_update_checking">正在检查更新</string>
-    <string name="nuke_update_check_summary">检查 WeKit 是否有可用的新版本。</string>
+    <string name="nuke_update_check_summary">检查 Wick 是否有可用的新版本。</string>
     <string name="nuke_update_check_again">重新检测</string>
     <string name="nuke_download_install">下载并安装</string>
     <string name="nuke_about_project">项目</string>
-    <string name="nuke_about_description_one">WeKit 是一个免费的开源 Xposed 模块。</string>
+    <string name="nuke_about_description_one">Wick 是一个免费的开源 Xposed 模块。</string>
     <string name="nuke_about_description_two">它为微信提供可选的功能增强与界面优化。</string>
     <string name="nuke_about_developers">开发者</string>
     <string name="nuke_about_links">链接</string>
     <string name="nuke_github_contributions">GitHub 贡献 %1$d 次</string>
-    <string name="nuke_wekit_developer">WeKit 开发者</string>
+    <string name="nuke_wekit_developer">Wick 开发者</string>
     <string name="nuke_github_avatar">%1$s 的 GitHub 头像</string>
     <string name="licenses_unknown_author">未知作者</string>
     <string name="licenses_version">版本 %1$s</string>
@@ -605,8 +608,6 @@
     <string name="feature_block_abnormal_size_stickers_description">拦截某些异常大小表情导致的闪退现象</string>
     <string name="feature_brute_force_group_member_real_names_first_char_name">爆破群成员实名首字</string>
     <string name="feature_brute_force_group_member_real_names_first_char_description">通过大额转账的姓名校验接口, 逐一尝试并还原群成员实名的首字 (与显示实名尾字功能配合可拼出完整姓名). 会向服务器发起多次转账下单 (不会真正扣款), 有触发风控的风险, 请自行承担</string>
-    <string name="feature_bypass_risk_file_blocking_name">解除风险文件拦截</string>
-    <string name="feature_bypass_risk_file_blocking_description">绕过“此文件已被用户投诉并核实存在安全风险，无法接收/无法打开”的提示，允许正常接收和打开被标记的文件</string>
     <string name="feature_chat_auto_reply_name">聊天自动回复</string>
     <string name="feature_chat_auto_reply_description">按任务规则匹配收到的文字消息并自动回复</string>
     <string name="feature_chat_footer_hooks_name">聊天输入栏钩子</string>
@@ -651,8 +652,6 @@
     <string name="feature_external_sharing_evolved_description">让微信的系统分享菜单更易用 (没写完)</string>
     <string name="feature_fabricate_chat_history_message_name">伪造聊天记录消息</string>
     <string name="feature_fabricate_chat_history_message_description">创建伪造的聊天记录并生成卡片消息 XML</string>
-    <string name="feature_fake_voice_duration_name">伪装语音时长</string>
-    <string name="feature_fake_voice_duration_description">预设定伪装发送语音显示的时长</string>
     <string name="feature_floating_chat_footer_name">悬浮输入框</string>
     <string name="feature_floating_chat_footer_description">将聊天输入框改为悬浮卡片形式, 带有圆角、阴影和侧边距\n</string>
     <string name="feature_floating_chat_header_name">悬浮标题栏</string>
@@ -670,7 +669,7 @@
     <string name="feature_markdown_rendering_name">Markdown 渲染</string>
     <string name="feature_markdown_rendering_description">渲染 Markdown 消息</string>
     <string name="feature_merge_chat_message_context_menu_items_name">消息长按菜单项合并展示</string>
-    <string name="feature_merge_chat_message_context_menu_items_description">开启后, 消息长按菜单只显示一个 WeKit 项, 点击后在对话框中集中展示所有模块菜单项</string>
+    <string name="feature_merge_chat_message_context_menu_items_description">开启后, 消息长按菜单只显示一个 Wick 项, 点击后在对话框中集中展示所有模块菜单项</string>
     <string name="feature_merge_messages_into_groups_name">合并消息显示</string>
     <string name="feature_merge_messages_into_groups_description">将同一发送者的连续多条消息合并为一组消息显示 (Telegram 风格)</string>
     <string name="feature_message_entrance_animation_name">消息进入动画</string>
@@ -746,8 +745,6 @@
     <string name="feature_anti_sec_msg_description">无视自己或别人发送的消息中的安全属性，长按消息始终显示正常、完整菜单</string>
     <string name="feature_anti_read_receipts_name">反已读追踪</string>
     <string name="feature_anti_read_receipts_description">拦截嵌入视频号缩略图链接中的追踪像素请求</string>
-    <string name="feature_auto_add_nearby_friends_name">自动添加附近的人</string>
-    <string name="feature_auto_add_nearby_friends_description">在附近的人菜单中添加菜单项, 可全自动向附近的人按模板发送消息 (没写完)</string>
     <string name="feature_auto_dnd_after_join_group_name">加入群聊自动免打扰</string>
     <string name="feature_auto_dnd_after_join_group_description">加入新的群聊后自动开启消息免打扰</string>
     <string name="feature_auto_remark_new_friends_name">添加自动备注</string>
@@ -821,7 +818,7 @@
     <string name="feature_mark_all_as_read_name">清空未读</string>
     <string name="feature_mark_all_as_read_description">在首页右上角菜单添加「清空未读」选项</string>
     <string name="feature_module_settings_name">模块设置</string>
-    <string name="feature_module_settings_description">在首页右上角菜单添加「WeKit」选项</string>
+    <string name="feature_module_settings_description">在首页右上角菜单添加「Wick」选项</string>
     <string name="feature_open_conversation_menu_name">跳转对话菜单</string>
     <string name="feature_open_conversation_menu_description">在首页右上角菜单添加「跳转对话」选项</string>
     <string name="feature_toggle_all_conversations_visibility_name">显隐全部对话</string>
@@ -866,8 +863,6 @@
     <string name="feature_display_details_description">在朋友圈列表项底部显示详情信息</string>
     <string name="feature_enhance_query_name">朋友圈查询增强</string>
     <string name="feature_enhance_query_description">显示历史撤回以及缓存过的朋友圈内容</string>
-    <string name="feature_fake_moments_likes_name">伪集赞</string>
-    <string name="feature_fake_moments_likes_description">自定义朋友圈点赞用户列表</string>
     <string name="feature_forward_messages_to_moments_name">消息转圈</string>
     <string name="feature_forward_messages_to_moments_description">将一些简单的消息转发到朋友圈</string>
     <string name="feature_moments_editor_back_optimization_name">朋友圈编辑界面返回逻辑优化</string>
@@ -893,28 +888,14 @@
     <string name="feature_use_multi_web_view_for_official_accounts_description">为公众号时间线预加载网页启用多任务</string>
     <string name="feature_allow_private_chat_receive_outgoing_red_packets_name">允许领取私聊红包</string>
     <string name="feature_allow_private_chat_receive_outgoing_red_packets_description">允许打开私聊中自己发出的红包\n可能导致发送红包提示「请求不成功」</string>
-    <string name="feature_auto_accept_transfers_name">自动接收转账</string>
-    <string name="feature_auto_accept_transfers_description">监听消息并自动接收转账</string>
-    <string name="feature_auto_open_red_packets_name">自动抢红包</string>
-    <string name="feature_auto_open_red_packets_description">监听消息并自动拆开红包</string>
     <string name="feature_display_red_packet_details_name">红包页面详情</string>
     <string name="feature_display_red_packet_details_description">红包领取页面显示更加详细的领取情况</string>
-    <string name="feature_fingerprint_pay_name">指纹支付</string>
-    <string name="feature_fingerprint_pay_description">使用指纹快捷确认支付</string>
-    <string name="feature_modify_transfer_wallet_balance_display_name">修改转账显示余额</string>
-    <string name="feature_modify_transfer_wallet_balance_display_description">伪装转账时显示的余额文字</string>
-    <string name="feature_modify_wallet_balance_display_name">修改显示余额</string>
-    <string name="feature_modify_wallet_balance_display_description">伪装钱包余额文字</string>
-    <string name="feature_open_history_red_packets_name">捡漏历史红包</string>
-    <string name="feature_open_history_red_packets_description">在联系人与群组详情页面添加选项, 扫描当前对话 24 小时内的红包消息并尝试领取</string>
     <string name="feature_remove_signature_limits_name">移除个性签名限制</string>
     <string name="feature_remove_signature_limits_description">允许大于 30 字与包含特殊字符的个性签名</string>
     <string name="feature_remove_text_status_length_limit_name">解除状态词长度限制</string>
     <string name="feature_remove_text_status_length_limit_description">将微信状态词的客户端长度上限从 10 提高到 2000</string>
     <string name="feature_set_profile_nickname_name">设置微信昵称</string>
     <string name="feature_set_profile_nickname_description">通过发包来更灵活的设置微信昵称</string>
-    <string name="feature_upload_transparent_avatars_name">上传透明头像</string>
-    <string name="feature_upload_transparent_avatars_description">头像上传时使用 PNG 格式保持透明</string>
     <string name="feature_decompile_bean_shell_snapshot_name">反编译 BeanShell 快照</string>
     <string name="feature_decompile_bean_shell_snapshot_description">不知道这是干啥的就别管了</string>
     <string name="feature_java_hook_api_name">脚本 Hook 服务</string>
@@ -927,8 +908,6 @@
     <string name="feature_download_media_description">向视频分享菜单中添加「复制链接」与「下载」菜单项</string>
     <string name="feature_remove_comment_ads_name">移除评论区广告</string>
     <string name="feature_remove_comment_ads_description">隐藏视频号评论区中的广告卡片</string>
-    <string name="feature_auto_approve_device_login_name">自动批准设备登录</string>
-    <string name="feature_auto_approve_device_login_description">其他设备请求登录时自动勾选选项并点击按钮</string>
     <string name="feature_auto_clean_cache_name">清理缓存垃圾</string>
     <string name="feature_auto_clean_cache_description">自动或手动清理微信的缓存</string>
     <string name="feature_custom_dpi_name">DPI 修改</string>
@@ -947,20 +926,12 @@
     <string name="feature_disable_web_view_safety_warnings_description">禁用 WebView 相关的安全警告提示</string>
     <string name="feature_enable_web_view_features_name">强制启用 WebView 菜单</string>
     <string name="feature_enable_web_view_features_description">强制显示 WebView 页面右上角菜单按钮</string>
-    <string name="feature_fake_location_name">虚拟定位</string>
-    <string name="feature_fake_location_description">预设微信与小程序获取到的经纬度；启用后请重启微信</string>
     <string name="feature_feature_flag_manager_name">灰度测试管理器</string>
     <string name="feature_feature_flag_manager_description">覆盖微信灰度测试 (Feature Flag) 的值</string>
-    <string name="feature_force_tablet_mode_name">强制平板模式</string>
-    <string name="feature_force_tablet_mode_description">让微信将当前设备识别为平板</string>
     <string name="feature_hide_module_from_app_list_name">隐藏模块应用</string>
     <string name="feature_hide_module_from_app_list_description">在不影响模块功能的情况下防止微信查询模块安装状态 (实验性)</string>
     <string name="feature_link_external_app_jump_name">链接跳转系统打开方式</string>
     <string name="feature_link_external_app_jump_description">打开链接或卡片链接时显示对话框, 可直接使用系统打开方式打开\n若要跳转到第三方应用, 需先在对应应用设置中启用「在此应用中打开支持的网页链接」</string>
-    <string name="feature_auto_like_sports_rank_name">运动排行榜自动点赞</string>
-    <string name="feature_auto_like_sports_rank_description">收到新的微信运动排行榜后，自动为符合条件的好友点赞</string>
-    <string name="feature_modify_sports_step_count_name">修改运动步数</string>
-    <string name="feature_modify_sports_step_count_description">修改微信获取到的或手动上传运动步数</string>
     <string name="feature_nerf_background_process_checker_name">禁用微信进程状态检测器</string>
     <string name="feature_nerf_background_process_checker_description">微信会在后台每隔一段时间检测微信主进程状态, 并在特定条件下故意抛出异常结束主进程\n虽然我不知道这玩意有啥用和是否应该关掉, 但「崩溃拦截」会把这玩意算进去, 有点烦, 所以如果你想关的话这里可以关</string>
     <string name="feature_power_saver_name">省电模式</string>
@@ -969,8 +940,6 @@
     <string name="feature_predictive_back_gestures_description">为微信的活动强制启用预见性返回动画\n需系统 Android SDK &gt;= 33</string>
     <string name="feature_prevent_module_data_deletion_name">阻止微信清理模块数据</string>
     <string name="feature_prevent_module_data_deletion_description">阻止微信「设置 → 存储空间 → 清理」删除模块数据</string>
-    <string name="feature_prevent_xposed_detection_name">禁止微信检测 Xposed</string>
-    <string name="feature_prevent_xposed_detection_description">防止微信检测 Xposed 框架是否存在</string>
     <string name="feature_qr_code_record_name">二维码扫描记录</string>
     <string name="feature_qr_code_record_description">记录二维码内容，并通过微信重新打开</string>
     <string name="feature_remove_article_ads_name">去除文章广告</string>
@@ -979,8 +948,6 @@
     <string name="feature_remove_external_app_sharing_signature_verify_description">移除第三方应用分享到微信的签名校验</string>
     <string name="feature_remove_qr_code_scan_limit_name">移除二维码扫描限制</string>
     <string name="feature_remove_qr_code_scan_limit_description">移除长按图片与相册选择的二维码扫描限制</string>
-    <string name="feature_spoof_environment_name">环境伪装</string>
-    <string name="feature_spoof_environment_description">伪装未启用 ADB, 开发者选项或 VPN, 可能有助于通过人脸等场景下的环境安全性检测</string>
     <string name="feature_use_legacy_wallet_view_in_me_page_name">恢复旧版「我」界面卡包</string>
     <string name="feature_use_legacy_wallet_view_in_me_page_description">在「我」界面使用旧版「卡包」而非「小店与卡包」</string>
     <string name="feature_we_agent_name">WeAgent</string>
@@ -993,8 +960,6 @@
     <string name="feature_pip_voip_description">让微信的音视频通话使用原生的画中画模式而非悬浮窗</string>
     <string name="feature_remove_limits_during_calls_name">移除通话时聊天限制</string>
     <string name="feature_remove_limits_during_calls_description">绕过正在通话时聊天限制</string>
-    <string name="feature_virtual_voip_video_name">虚拟视频通话</string>
-    <string name="feature_virtual_voip_video_description">在微信视频通话相机预览中播放本地视频或网络直播流</string>
     <!-- Feature API metadata -->
     <string name="feature_we_app_msg_api_name">AppMsg 发送服务</string>
     <string name="feature_we_app_msg_api_description">提供 XML 卡片消息发送能力</string>
@@ -1607,7 +1572,7 @@
     <string name="sticker_telegram_single_title">从 Telegram 导入单个包</string>
     <string name="sticker_telegram_source_manual_description">从系统文件选择器读取一个 Telegram 数据库</string>
     <string name="sticker_telegram_source_manual_title">手动选择 Telegram 数据库 (cache4.db)</string>
-    <string name="sticker_telegram_source_root_description">跳转到 WeKit 模块应用扫描实例并解析数据库</string>
+    <string name="sticker_telegram_source_root_description">跳转到 Wick 模块应用扫描实例并解析数据库</string>
     <string name="sticker_telegram_source_root_title">使用 Root 权限直接读取 Telegram 数据库</string>
     <string name="sticker_telegram_token_required">请先在设置中填写 Telegram Bot Token</string>
     <string name="sticker_telegram_will_import">将导入：%1$s</string>
@@ -1818,8 +1783,6 @@
     <string name="chat_anti_recall_badge_text_content">已撤回</string>
     <string name="chat_placeholder_content">占位符文本内容</string>
     <string name="chat_placeholder_insert_hint">点击插入占位符：</string>
-    <string name="chat_fake_voice_duration_millis">语音时长（毫秒）</string>
-    <string name="chat_fake_voice_duration_invalid">时长格式不正确！</string>
     <string name="chat_hide_avatar_incoming">隐藏私聊对方头像</string>
     <string name="chat_hide_avatar_incoming_description">仅在私聊中隐藏对方的用户头像</string>
     <string name="chat_hide_avatar_outgoing">隐藏发送消息头像</string>
@@ -2707,7 +2670,7 @@
     </plurals>
     <string name="contacts_detect_stop">终止</string>
     <string name="contacts_detect_back">返回</string>
-    <string name="contacts_detect_suggested_label">WeKit_单删好友_%1$s</string>
+    <string name="contacts_detect_suggested_label">Wick_单删好友_%1$s</string>
     <string name="contacts_detect_mark_label">标记标签</string>
     <string name="contacts_detect_delete_all">全部删除</string>
     <string name="contacts_hide_restored">已恢复隐藏联系人</string>
@@ -2999,11 +2962,11 @@
     <string name="shortvideos_unknown_media_type">未知的媒体类型</string>
     <string name="shortvideos_image_download_started">开始下载第 %1$d 张图片</string>
     <string name="shortvideos_image_download_reported_success">第 %1$d 张图片下载成功</string>
-    <string name="shortvideos_image_downloaded_to">已将图片下载到 /sdcard/Download/WeKit/%1$s</string>
+    <string name="shortvideos_image_downloaded_to">已将图片下载到 /sdcard/Download/Wick/%1$s</string>
     <string name="shortvideos_downloading_video">正在下载视频…</string>
     <string name="shortvideos_decrypting_video">正在解密视频…</string>
     <string name="shortvideos_video_download_failed">视频下载失败</string>
-    <string name="shortvideos_video_downloaded_to">已将视频下载到 /sdcard/Download/WeKit/%1$s</string>
+    <string name="shortvideos_video_downloaded_to">已将视频下载到 /sdcard/Download/Wick/%1$s</string>
     <string name="shortvideos_video_download_started">开始下载视频</string>
     <!-- Task 5 group 2: themes and home side panel -->
     <string name="action_back">返回</string>
@@ -3026,7 +2989,7 @@
     <string name="home_side_panel_moments">朋友圈</string>
     <string name="home_side_panel_channels">视频号</string>
     <string name="home_side_panel_mark_all_read">清空未读</string>
-    <string name="home_side_panel_wekit_settings">WeKit 设置</string>
+    <string name="home_side_panel_wekit_settings">Wick 设置</string>
     <string name="home_side_panel_open_profile">打开个人资料</string>
     <string name="home_side_panel_settings">侧栏设置</string>
     <string name="home_side_panel_online">在线</string>
@@ -3546,16 +3509,6 @@
     <string name="system_auto_clean_next">\n下次清理：%1$s</string>
     <string name="system_custom_dpi_width">显示宽度（dp）</string>
     <string name="system_failure">失败</string>
-    <string name="system_fake_location_launch_failed">打开位置选择器失败：%1$s</string>
-    <string name="system_fake_location_listener_failed">注册位置监听器失败</string>
-    <string name="system_fake_location_no_activity">当前没有前台 Activity</string>
-    <string name="system_fake_location_osm">OpenStreetMap 选择器</string>
-    <string name="system_fake_location_osm_summary">在 OpenStreetMap 上选择位置</string>
-    <string name="system_fake_location_parse_failed">解析所选位置失败</string>
-    <string name="system_fake_location_select">选择位置</string>
-    <string name="system_fake_location_selected">已选择：%1$s，%2$s</string>
-    <string name="system_fake_location_wechat">微信位置选择器</string>
-    <string name="system_fake_location_wechat_summary">使用微信选择位置</string>
     <string name="system_feature_flags_copy_class">复制类名</string>
     <string name="system_feature_flags_copy_config_key">复制配置键</string>
     <string name="system_feature_flags_copy_description">复制描述</string>
@@ -3585,16 +3538,7 @@
     <string name="system_loading">加载中…</string>
     <string name="system_none">无</string>
     <string name="system_predictive_back_unsupported">当前 Android 版本不支持预见性返回</string>
-    <string name="system_prevent_xposed_google_play_warning">微信 Google Play 版本无法使用此功能。</string>
     <string name="system_risky_feature_warning">此功能可能带来账号风险，请在了解后果的情况下继续。</string>
-    <string name="system_sports_active_value">主动上传步数</string>
-    <string name="system_sports_fixed">固定值</string>
-    <string name="system_sports_multiplier">倍数</string>
-    <string name="system_sports_passive_mode">被动修改</string>
-    <string name="system_sports_passive_value">被动上传步数表达式</string>
-    <string name="system_sports_passive_expression_hint">value 表示原始步数，例如：value * 2 + 1000</string>
-    <string name="system_sports_upload">上传</string>
-    <string name="system_sports_upload_result">上传%1$s</string>
     <string name="system_success">成功</string>
     <string name="system_qr_code_record_empty">暂无记录</string>
     <string name="system_qr_code_record_copy">复制内容</string>
@@ -3624,24 +3568,24 @@
     <string name="system_api_server_port">端口</string>
     <string name="system_api_server_invalid_port">端口格式不正确！</string>
     <!-- Non-Compose and injected-host messages -->
-    <string name="noncompose_features_loaded">WeKit 加载成功！</string>
+    <string name="noncompose_features_loaded">Wick 加载成功！</string>
     <string name="noncompose_restarting_host">正在重启…</string>
     <string name="noncompose_bsh_saved">已保存到 %1$s</string>
     <string name="noncompose_bsh_empty_result">错误：反编译结果为空。</string>
     <string name="noncompose_bsh_error">错误：%1$s</string>
     <string name="noncompose_bsh_selection_cancelled">已取消选择文件。</string>
-    <string name="noncompose_update_download_title">WeKit 更新</string>
+    <string name="noncompose_update_download_title">Wick 更新</string>
     <string name="noncompose_update_downloading">正在下载更新…</string>
     <string name="noncompose_moments_thumbnail_warning">警告：正在使用缩略图。建议先查看一次图片以下载原图。</string>
     <string name="noncompose_chat_input_no_actions">没有可用的聊天输入栏功能。</string>
     <string name="noncompose_chat_input_actions_title">聊天功能</string>
-    <string name="noncompose_message_menu_no_actions">没有可用于所选消息的 WeKit 菜单项。</string>
+    <string name="noncompose_message_menu_no_actions">没有可用于所选消息的 Wick 菜单项。</string>
     <plurals name="noncompose_message_menu_selected_title">
-        <item quantity="other">WeKit（%1$d 条消息）</item>
+        <item quantity="other">Wick（%1$d 条消息）</item>
     </plurals>
     <string name="noncompose_message_menu_adapted_section">已适配多选消息</string>
     <string name="noncompose_message_menu_automatic_section">自动兼容多选消息</string>
-    <string name="noncompose_wekit_settings_entry">WeKit 设置</string>
+    <string name="noncompose_wekit_settings_entry">Wick 设置</string>
     <string name="noncompose_wekit_settings_group">插件</string>
     <!-- WeAgent live panel -->
     <string name="agent_panel_collapse_sessions">收起会话侧栏</string>
@@ -3683,7 +3627,7 @@
     <string name="agent_panel_rejection_reason">拒绝理由（可选）</string>
     <string name="agent_panel_reject">拒绝</string>
     <string name="agent_panel_approve">同意</string>
-    <string name="telegram_root_permission_required">需要授予 WeKit 模块应用 Root 权限。</string>
+    <string name="telegram_root_permission_required">需要授予 Wick 模块应用 Root 权限。</string>
     <string name="telegram_database_scan_failed">扫描 Telegram 数据库失败：%1$s</string>
     <string name="telegram_root_command_failed">Root 命令执行失败</string>
     <string name="telegram_database_not_found">未找到 cache4.db，请确认 Telegram 已登录并至少启动过一次。</string>

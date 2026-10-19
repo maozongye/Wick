@@ -19,7 +19,9 @@ object CrashInterceptor : SwitchFeature() {
 
     private const val TAG = "CrashInterceptor"
 
-    override val defaultEnabled = true
+    // Off by default: it is a debug aid, and a crash handler installed into the host is both
+    // an extra hook surface and an unusual signal. Users who want it turn it on explicitly.
+    override val defaultEnabled = false
 
     override fun onEnable() {
         JavaCrashHandler.install()

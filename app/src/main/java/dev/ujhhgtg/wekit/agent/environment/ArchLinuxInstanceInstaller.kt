@@ -4,6 +4,7 @@ import kotlin.io.path.copyTo
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.isSymbolicLink
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import dev.ujhhgtg.wekit.utils.WeLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -100,7 +101,7 @@ object ArchLinuxInstanceInstaller {
             val deadline = System.nanoTime() + HEALTH_TIMEOUT_MILLIS * 1_000_000
             val healthOutput = ByteArrayOutputStream(MAX_HEALTH_OUTPUT_BYTES)
             val outputExceeded = AtomicBoolean()
-            val outputReader = thread(name = "wekit-proot-health-output", isDaemon = true) {
+            val outputReader = thread(name = BuildFingerprint.threadName("proot-health"), isDaemon = true) {
                 health.inputStream.use { input ->
                     val buffer = ByteArray(8192)
                     while (true) {

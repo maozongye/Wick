@@ -3,13 +3,22 @@ package dev.ujhhgtg.wekit.loader.utils
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Process
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import dev.ujhhgtg.wekit.utils.fs.copyFrom
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-/** Native artifacts from the copied APK; accessed under NativeLoader's load lock. */
+/**
+ * Native artifacts from the copied APK; accessed under NativeLoader's load lock.
+ *
+ * The extraction root below the host data dir is derived from the build nonce: it used to be
+ * the fixed ".wekit-native" literal, which made every extracted library path a fingerprint.
+ */
 class ZygiskNativePayload(val apk: File, private val dataDir: File) {
+
+    /** Derived extraction-root name; the native side hides maps entries by this same prefix. */
+    val nativeDirName: String = "." + BuildFingerprint.label
 
     /** Extracts only the generated decoder; executable payloads are never loaded by this path. */
     fun decoderLibrary(fileName: String): File = ZipFile(apk).use { archive ->
@@ -35,7 +44,7 @@ class ZygiskNativePayload(val apk: File, private val dataDir: File) {
             "androidx.graphics.path",
             "dexkit",
             "mmkv",
-            "wekit_native",
+            "wick_native",
             "invoke_tool",
         )
         for (name in names) {
@@ -45,17 +54,17 @@ class ZygiskNativePayload(val apk: File, private val dataDir: File) {
             libraries[name] = extracted
             // MMKV loads through its callback; executable artifacts must never be dlopen-ed.
             when (name) {
-                "androidx.graphics.path", "dexkit", "wekit_native" -> System.load(extracted.absolutePath)
+                "androidx.graphics.path", "dexkit", "wick_native" -> System.load(extracted.absolutePath)
             }
         }
-        for (name in listOf("dexkit", "wekit_native")) {
+        for (name in listOf("dexkit", "wick_native")) {
             require(name in libraries) { "Zygisk payload is missing lib$name.so for $abi" }
         }
         libraries
     }
 
     private fun libraryDirectory(abi: String): File {
-        val directory = File(dataDir, ".wekit-native/${apk.nameWithoutExtension}/$abi")
+        val directory = File(dataDir, "$nativeDirName/${apk.nameWithoutExtension}/$abi")
         if (!directory.exists() && !directory.mkdirs()) {
             error("cannot create Zygisk native-library directory: $directory")
         }
@@ -70,7 +79,7 @@ class ZygiskNativePayload(val apk: File, private val dataDir: File) {
             Build.SUPPORTED_32_BIT_ABIS.asList()
         }
         return candidates.firstOrNull { abi ->
-            archive.getEntry("lib/$abi/libwekit_native.so") != null
+            archive.getEntry("lib/$abi/libwick_native.so") != null
         } ?: error("Zygisk payload has no native library for this process ABI")
     }
 

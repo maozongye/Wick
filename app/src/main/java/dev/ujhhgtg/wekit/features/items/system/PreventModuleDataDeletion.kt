@@ -3,7 +3,6 @@ package dev.ujhhgtg.wekit.features.items.system
 import dev.ujhhgtg.reflekt.reflekt
 import dev.ujhhgtg.reflekt.utils.Modifiers
 import dev.ujhhgtg.wekit.R
-import dev.ujhhgtg.wekit.BuildConfig
 import dev.ujhhgtg.wekit.dexkit.abc.IResolveDex
 import dev.ujhhgtg.wekit.dexkit.dsl.dexMethod
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
@@ -50,8 +49,10 @@ object PreventModuleDataDeletion : SwitchFeature(), IResolveDex {
             val basePath = basePathField.get(thisObject) as String
 
             val path = "$basePath/$relPath"
+            // Match only real module-owned locations. The old `path.contains(BuildConfig.TAG)`
+            // also matched unrelated host files whose names happen to contain the product name.
             if (path.startsWith(KnownPaths.moduleRoot.toFile().absolutePath) ||
-                path.contains(BuildConfig.TAG) || path.contains("Layout Inspect")
+                path.contains("Layout Inspect")
             ) {
                 result = true
             }

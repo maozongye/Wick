@@ -5,6 +5,7 @@ import dev.ujhhgtg.wekit.agent.data.entity.McpTransport
 import dev.ujhhgtg.wekit.agent.tool.ProviderKind
 import dev.ujhhgtg.wekit.agent.tool.ProviderTool
 import dev.ujhhgtg.wekit.agent.tool.ToolProvider
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import dev.ujhhgtg.wekit.utils.WeLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
@@ -98,7 +99,7 @@ class McpToolProvider(
             t.onClose { onTransportClosed() }
             t.onError { e -> onTransportError(e) }
 
-            val c = Client(Implementation(name = "wekit-mcp-client", version = BuildConfig.VERSION_NAME))
+            val c = Client(Implementation(name = BuildFingerprint.label, version = BuildConfig.VERSION_NAME))
             c.connect(t)
             client = c
             val tools = fetchTools(c)

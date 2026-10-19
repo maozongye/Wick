@@ -57,10 +57,10 @@ object FridaStartupImpl : ILoaderService {
     override val mainModulePath: String
         get() = mModulePath.absolutePath
 
-    override fun log(msg: String) = Log.i(BuildConfig.TAG, msg).let {}
+    override fun log(msg: String) = Log.i(BuildConfig.INTERNAL_TAG, msg).let {}
 
     override fun log(tr: Throwable) {
-        Log.e(BuildConfig.TAG, tr.toString(), tr)
+        Log.e(BuildConfig.INTERNAL_TAG, tr.toString(), tr)
     }
 
     override fun queryExtension(key: String, vararg args: Any?): Any? {

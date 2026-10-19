@@ -80,12 +80,38 @@ unsafe fn remap_segment(start: usize, len: usize, orig_prot: c_int) -> bool {
     if read_prot_changed && libc::mprotect(start as *mut _, len, orig_prot | libc::PROT_READ) != 0 {
         return false;
     }
-    // If memfd_create fails, restore original protection and return
-    let mfd = libc::syscall(
-        libc::SYS_memfd_create,
-        c"wk".as_ptr(),
-        libc::MFD_CLOEXEC as libc::c_ulong,
-    ) as c_int;
+    // A fixed memfd name ("wk") is a stronger signature than the path it replaced — every
+    // remapped segment showed up as an identical /memfd:wk (deleted) line. Draw a random,
+    // process-unique name instead. Needs no cryptographic quality, only unpredictability.
+    let mut name_seed = [0u8; 6];
+    let filled = unsafe {
+        let fd = libc::open(c"/dev/urandom".as_ptr(), libc::O_RDONLY | libc::O_CLOEXEC);
+        if fd >= 0 {
+            let n = libc::read(fd, name_seed.as_mut_ptr().cast(), name_seed.len());
+            libc::close(fd);
+            n
+        } else {
+            -1
+        }
+    };
+    if filled != name_seed.len() as isize {
+        // Fall back to ASLR-derived entropy; still per-call unique inside this process.
+        let aslr = start as u64;
+        name_seed.copy_from_slice(&aslr.to_le_bytes()[..6]);
+    }
+    let mut name = [0u8; 7];
+    for (i, &b) in name_seed.iter().enumerate() {
+        // Map each byte into 'a'..='z' so the name is alphanumeric in maps output.
+        name[i] = b'a' + (b % 26);
+    }
+    name[6] = b'\0';
+    let mfd = unsafe {
+        libc::syscall(
+            libc::SYS_memfd_create,
+            name.as_ptr(),
+            libc::MFD_CLOEXEC as libc::c_ulong,
+        ) as c_int
+    };
     if mfd < 0 {
         if read_prot_changed {
             libc::mprotect(start as *mut _, len, orig_prot);

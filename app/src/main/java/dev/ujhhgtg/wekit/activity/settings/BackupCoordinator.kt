@@ -8,6 +8,7 @@ import dev.ujhhgtg.wekit.data.WeKitDatabase
 import dev.ujhhgtg.wekit.utils.HostInfo
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.restartHost
+import dev.ujhhgtg.wekit.utils.fs.KnownPaths
 import dev.ujhhgtg.wekit.utils.fs.LegacyPaths
 import dev.ujhhgtg.wekit.utils.fs.LegacyStorageMigration
 import java.io.BufferedInputStream
@@ -62,9 +63,6 @@ object BackupCoordinator {
         "chat_folders.json",
         "moments_custom_bottom_details.json",
         "feature_flag_overrides.json",
-        "red_packet_settings.json",
-        "red_packet_group_members.json",
-        "auto_accept_transfer_settings.json",
         "auto_like_moments_settings.json",
         "auto_repost_moments_settings.json",
         "real_names.json",
@@ -93,7 +91,7 @@ object BackupCoordinator {
 
     fun create(context: Context, output: File): Result = withStorageLock(context) {
         val root = storageRoot(context)
-        require(root.isDirectory) { "WeKit 数据目录不存在" }
+        require(root.isDirectory) { "Wick 数据目录不存在" }
         val database = WeKitDatabase.file
         require(database.isFile) { "统一数据库不存在，无法创建完整备份" }
 
@@ -204,6 +202,12 @@ object BackupCoordinator {
         File(HostInfo.application.codeCacheDir, "generated_proxy_classes").deleteRecursively()
         val mmkv = File(HostInfo.application.filesDir, "mmkv")
         listOf("wekit_prefs", "wekit_prefs.crc").forEach { File(mmkv, it).delete() }
+        // Modern payloads publish under code_cache with bare digest names; older ones used
+        // the branded .wekit-bootstrap- prefix inside the host's mmkv directory.
+        HostInfo.application.codeCacheDir.listFiles()
+            .orEmpty()
+            .filter { it.isFile && it.name.startsWith(".") && it.name.endsWith(".apk") }
+            .forEach(File::delete)
         mmkv.listFiles()
             .orEmpty()
             .filter { it.name.startsWith(".wekit-bootstrap-") }
@@ -231,7 +235,8 @@ object BackupCoordinator {
             result
         }
 
-    fun storageRoot(context: Context): File = File(context.filesDir, "wekit")
+    /** Current module root. Resolved through [KnownPaths] so the derived location is the only source. */
+    fun storageRoot(context: Context): File = KnownPaths.moduleRoot.toFile()
 
     private fun manifestJson(
         context: Context,

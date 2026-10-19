@@ -13,10 +13,15 @@ use std::{
 
 /// Copy the already-open module APK after specialization. Content-addressed paths
 /// keep resources, DEX, native libraries and child processes on the same version.
+///
+/// The copy lives under `code_cache` with a bare digest name: the old
+/// `files/mmkv/.wekit-bootstrap-<sha>.apk` path put a module-branded file inside the
+/// host's own scanned storage area, while `code_cache` is a natural APK-derivative
+/// location that integrity checks ignore.
 pub fn publish_apk(mut source: File, data_dir: &str) -> Result<(PathBuf, Vec<Vec<u8>>)> {
-    let directory = Path::new(data_dir).join("files/mmkv");
+    let directory = Path::new(data_dir).join("code_cache");
     fs::create_dir_all(&directory)?;
-    let temporary = directory.join(format!(".wekit-bootstrap-{}.tmp", std::process::id()));
+    let temporary = directory.join(format!(".{}.tmp", std::process::id()));
     // A prior crash may have left this PID's temporary file. Never follow it.
     match fs::remove_file(&temporary) {
         Ok(()) => {}
@@ -57,7 +62,7 @@ pub fn publish_apk(mut source: File, data_dir: &str) -> Result<(PathBuf, Vec<Vec
             .iter()
             .map(|byte| format!("{byte:02x}"))
             .collect::<String>();
-        let destination = directory.join(format!(".wekit-bootstrap-{digest}.apk"));
+        let destination = directory.join(format!(".{digest}.apk"));
         // Decode the exact copy before publication so APK and DEX cannot diverge.
         let file = OpenOptions::new()
             .read(true)
@@ -193,6 +198,6 @@ mod tests {
         for (path, bytes) in previous {
             assert_eq!(fs::read(path).unwrap(), bytes);
         }
-        assert_eq!(fs::read_dir(host.join("files/mmkv")).unwrap().count(), 2);
+        assert_eq!(fs::read_dir(host.join("code_cache")).unwrap().count(), 2);
     }
 }

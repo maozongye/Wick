@@ -3,6 +3,7 @@ package dev.ujhhgtg.wekit.utils.fs
 import android.content.Context
 import dev.ujhhgtg.wekit.data.LegacyDocumentMigration
 import dev.ujhhgtg.wekit.data.JsonDataMigration
+import dev.ujhhgtg.wekit.data.WeKitDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import dev.ujhhgtg.wekit.utils.WeLogger
@@ -89,10 +90,9 @@ object LegacyStorageMigration {
      * there.
      */
     fun cleanupOldData(context: Context): LegacyCleanupResult {
-        // Avoid creating a fresh module root merely to report that migration has not run.  The
-        // context is used as the authority for the new root; LegacyPaths still resolves the old
-        // roots through HostInfo, which is initialized before settings can be shown.
-        val root = File(context.filesDir, "wekit")
+        // The current root is resolved through KnownPaths; only the legacy roots below are
+        // candidates for deletion.
+        val root = KnownPaths.moduleRoot.toFile()
         val marker = File(root, MARKER)
         if (!marker.isFile && LegacyPaths.localSourcesAllowed) {
             return LegacyCleanupResult(
@@ -101,7 +101,7 @@ object LegacyStorageMigration {
                 blockedReason = "legacy storage migration has not completed",
             )
         }
-        if (!File(root, "wekit.db").isFile) {
+        if (!File(root, WeKitDatabase.FILE_NAME).isFile) {
             return LegacyCleanupResult(
                 removedPaths = emptyList(),
                 retainedPaths = emptyList(),

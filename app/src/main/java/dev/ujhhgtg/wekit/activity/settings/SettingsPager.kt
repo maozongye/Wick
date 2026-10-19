@@ -136,6 +136,8 @@ import dev.ujhhgtg.wekit.ui.utils.theme.SettingsUiEngine
 import dev.ujhhgtg.wekit.ui.utils.theme.ThemeSettings
 import dev.ujhhgtg.wekit.utils.AppUpdater
 import dev.ujhhgtg.wekit.utils.UpdateResult
+import dev.ujhhgtg.wekit.utils.RiskControlGate
+import dev.ujhhgtg.wekit.utils.RiskControlLevel
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.android.showToastSuspend
 import dev.ujhhgtg.wekit.utils.formatEpoch
@@ -185,6 +187,7 @@ fun SettingsPager(onOpenLicense: () -> Unit) {
         // 调试
         item {
             SegmentedColumn(title = stringResource(R.string.settings_section_debug)) {
+                item { RiskControlStatus() }
                 item { SecuritySwitch(context) }
                 item {
                     PrefSwitch(
@@ -826,6 +829,32 @@ private fun PrefArrow(
             trailingContent = { Icon(imageVector = MaterialSymbols.Outlined.Chevron_right, contentDescription = null) },
         )
     }
+}
+
+@Composable
+private fun RiskControlStatus() {
+    if (RiskControlGate.level == RiskControlLevel.NONE) return
+    val deadlineFmt = remember { java.text.SimpleDateFormat.getDateTimeInstance() }
+    val description = when (RiskControlGate.level) {
+        RiskControlLevel.L1_OBSERVED ->
+            stringResource(R.string.settings_risk_control_observed)
+        RiskControlLevel.L2_THROTTLED ->
+            stringResource(
+                R.string.settings_risk_control_paused,
+                deadlineFmt.format(java.util.Date(RiskControlGate.cooldownUntil)),
+            )
+        RiskControlLevel.L3_COOLDOWN ->
+            stringResource(
+                R.string.settings_risk_control_cooldown,
+                deadlineFmt.format(java.util.Date(RiskControlGate.cooldownUntil)),
+            )
+        RiskControlLevel.NONE -> return
+    }
+    BaseWidget(
+        title = stringResource(R.string.settings_safe_mode_title),
+        description = description,
+        icon = MaterialSymbols.Outlined.Shield,
+    )
 }
 
 @Composable

@@ -45,7 +45,7 @@ WebUI 会自动列出设备上所有 Android 用户中包名以 `com.tencent.mm`
 
 1. 下载新版 WeKit APK, 将扩展名改为 `.zip`。
 2. 在 Root 管理器中覆盖刷入 WeKit 模块, 保留已有注入目标开关。
-3. 查看安装器对 Zygisk 原生注入器 (`libwekit_zygisk.so`) 的比较结果:
+3. 查看安装器对 Zygisk 原生注入器 (`libwick_zygisk.so`) 的比较结果:
    - so 内容有变化: 提示需要重启设备, 加载新注入器。
    - so 内容未变、仅 APK 更新: 提示无须因本次 APK 更新重启设备;
      更新激活后, 完全结束微信的全部进程并重新启动即可。
@@ -117,7 +117,7 @@ WebUI 页面底部的「WebUI 日志」用于排查应用扫描和开关保存�
 遇到注入、加载或闪退问题时, 点击 WebUI 的「导出日志」。日志会保存到:
 
 ```text
-/data/adb/wekit_zygisk/logcat.log
+/data/adb/wick_zygisk/logcat.log
 ```
 
 提交问题时, 请同时提供:

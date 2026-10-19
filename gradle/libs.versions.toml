@@ -12,7 +12,6 @@ activity = "1.13.0"
 navigationevent = "1.1.2"
 kotlin = "2.4.20"
 androidx-core-ktx = "1.19.0"
-osmdroid = "6.1.20"
 profileinstaller = "1.4.1"
 serialization = "1.11.0"
 lombok = "1.18.48"
@@ -103,7 +102,6 @@ markwon-ext-strikethrough = { module = "io.noties.markwon:ext-strikethrough", ve
 markwon-ext-tables = { module = "io.noties.markwon:ext-tables", version.ref = "markwon" }
 markwon-ext-tasklist = { module = "io.noties.markwon:ext-tasklist", version.ref = "markwon" }
 markwon-html = { module = "io.noties.markwon:html", version.ref = "markwon" }
-osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }

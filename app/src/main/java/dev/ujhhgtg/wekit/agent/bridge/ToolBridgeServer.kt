@@ -23,20 +23,32 @@ class ToolBridgeServer(
     private val tokens = java.util.concurrent.ConcurrentHashMap<String, ToolBridgeSession>()
     private val connectionPermits = java.util.concurrent.Semaphore(MAX_CONNECTIONS)
     private var server: ServerSocket? = null
-    val port: Int get() = server?.localPort ?: error("bridge is not running")
+    private val startLock = Any()
 
-    fun start(): Int {
-        check(server == null)
-        server = ServerSocket(0, 32, InetAddress.getByName("127.0.0.1"))
-        scope.launch(Dispatchers.IO) {
-            while (true) {
-                val socket = runCatching { server!!.accept() }.getOrNull() ?: break
-                if (!connectionPermits.tryAcquire()) socket.close() else launch(Dispatchers.IO) {
-                    try { serve(socket) } finally { connectionPermits.release() }
-                }
+    /**
+     * Binds on first use. A loopback listener is a cheap fingerprint — a process that never
+     * uses the agent must not hold one — so startup is deferred until an endpoint is actually
+     * requested.
+     */
+    val port: Int get() = ensureStarted()
+
+    fun start(): Int = ensureStarted()
+
+    private fun ensureStarted(): Int = synchronized(startLock) {
+        server?.let { return it.localPort }
+        val bound = ServerSocket(0, 32, InetAddress.getByName("127.0.0.1"))
+        server = bound
+        scope.launch(Dispatchers.IO) { acceptLoop(bound) }
+        bound.localPort
+    }
+
+    private fun acceptLoop(bound: ServerSocket) {
+        while (true) {
+            val socket = runCatching { bound.accept() }.getOrNull() ?: break
+            if (!connectionPermits.tryAcquire()) socket.close() else scope.launch(Dispatchers.IO) {
+                try { serve(socket) } finally { connectionPermits.release() }
             }
         }
-        return port
     }
 
     suspend fun open(

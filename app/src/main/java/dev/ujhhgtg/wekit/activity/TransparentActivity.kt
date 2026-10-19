@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import dev.ujhhgtg.wekit.BuildConfig
 import dev.ujhhgtg.wekit.utils.android.isDarkMode
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 
 class TransparentActivity : FragmentActivity() {
 
@@ -41,7 +42,7 @@ class TransparentActivity : FragmentActivity() {
             context.startActivity(
                 Intent(context, TransparentActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    putExtra(BuildConfig.TAG, true)
+                    putExtra(BuildFingerprint.intentKey, true)
                 }
             )
         }

@@ -70,7 +70,7 @@ class LinuxEnvironmentManager(
             val workingDirectory = File(nativeWorkingDirectory ?: nativeSnapshot.workingDirectory).apply { mkdirs() }
             nativeSnapshot = nativeSnapshot.copy(
                 workingDirectory = workingDirectory.absolutePath,
-                bridgeLocation = workingDirectory.resolve(".weagent/bin/invoke_tool").absolutePath,
+                bridgeLocation = workingDirectory.resolve("${AgentPaths.dir}/bin/invoke_tool").absolutePath,
                 environmentVariables = nativeEnvironmentVariables,
             )
             mutableNativeSnapshot.value = nativeSnapshot
@@ -95,7 +95,7 @@ class LinuxEnvironmentManager(
         )
         nativeSnapshot = nativeSnapshot.copy(
             workingDirectory = directory.path,
-            bridgeLocation = directory.resolve(".weagent/bin/invoke_tool").path,
+            bridgeLocation = directory.resolve("${AgentPaths.dir}/bin/invoke_tool").path,
             environmentVariables = variables,
         )
         mutableNativeSnapshot.value = nativeSnapshot
@@ -435,7 +435,7 @@ class LinuxEnvironmentManager(
                 architecture = System.getProperty("os.arch") ?: "unknown",
                 shell = "/system/bin/sh",
                 workingDirectory = workingDirectory.absolutePath,
-                bridgeLocation = workingDirectory.resolve(".weagent/bin/invoke_tool").absolutePath,
+                bridgeLocation = workingDirectory.resolve("${AgentPaths.dir}/bin/invoke_tool").absolutePath,
                 privilegesAndCapabilities = "WeChat UID and SELinux domain; no additional root privileges",
             )
         }

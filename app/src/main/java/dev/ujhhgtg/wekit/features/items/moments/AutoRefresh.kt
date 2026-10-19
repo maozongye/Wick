@@ -64,6 +64,8 @@ object AutoRefresh : ClickableFeature(), IResolveDex {
     override val categoryIds = listOf(FeatureCategoryIds.MOMENTS)
     override val descriptionRes = R.string.feature_auto_refresh_description
 
+    override val automationRisk = true
+
     private const val TAG = "AutoRefresh"
     private const val DEFAULT_INTERVAL_MINUTES = 30L
     private const val MIN_INTERVAL_MINUTES = 1

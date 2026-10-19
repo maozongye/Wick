@@ -6,13 +6,13 @@ import dev.ujhhgtg.reflekt.reflekt
 import dev.ujhhgtg.wekit.R
 import dev.ujhhgtg.wekit.dexkit.abc.IResolveDex
 import dev.ujhhgtg.wekit.dexkit.dsl.dexMethod
-import dev.ujhhgtg.wekit.features.core.ApiFeature
+import dev.ujhhgtg.wekit.features.core.LazyFeature
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
 import dev.ujhhgtg.wekit.utils.HookParam
 import org.json.JSONObject
 import java.util.LinkedList
 
-object WeShortVideosShareMenuApi : ApiFeature(), IResolveDex {
+object WeShortVideosShareMenuApi : LazyFeature(), IResolveDex {
 
     override val technicalId = "视频号分享菜单扩展"
     override val nameRes = R.string.feature_we_short_videos_share_menu_api_name
@@ -33,6 +33,9 @@ object WeShortVideosShareMenuApi : ApiFeature(), IResolveDex {
 
     fun addProvider(provider: IMenuItemsProvider) {
         menuItems[provider] = provider.getMenuItems()
+
+        // First consumer arms the API; until then no hook is installed.
+        arm()
     }
 
     fun removeProvider(provider: IMenuItemsProvider) {
@@ -84,7 +87,7 @@ object WeShortVideosShareMenuApi : ApiFeature(), IResolveDex {
         }
     }
 
-    override fun onEnable() {
+    override fun installHooks() {
         methodCreateMenu1.hookBefore {
             val menu = args[0] as ContextMenu
             handleCreateMenu(menu)

@@ -91,7 +91,7 @@ private fun HideContacts.installMomentsRedDotHook() {
 private fun HideContacts.installMomentsInlineEntryHook() {
     // `a65.ha6`'s own field names are obfuscated and drift across versions, and the class name
     // itself isn't guaranteed either — so it is never referenced directly. Instead we borrow the
-    // same trick FakeMomentsLikes already uses: ha6 is also the return type of
+    // same trick the removed FakeMomentsLikes feature used: ha6 is also the return type of
     // SnsCommentFooter.getCommentInfo(), and that method name is real (not obfuscated).
     val entryClass = runCatching {
         SnsCommentFooter::class.java.getMethod("getCommentInfo").returnType
@@ -116,7 +116,7 @@ private fun HideContacts.installMomentsInlineEntryHook() {
     // SnsObject (com.tencent.mm.protobuf.f) has no clone(); the only reliable way to duplicate one
     // is a full serialize + reparse round trip through the protobuf codec it already implements.
     // parseFrom() isn't declared on the SnsObject stub (only toByteArray()/the LikeUserList family
-    // are), so it is resolved reflectively once here, exactly as FakeMomentsLikes already does.
+    // are), so it is resolved reflectively once here.
     val parseFromMethod = runCatching {
         SnsObject::class.reflekt().firstMethod { name = "parseFrom"; superclass() }.self
     }.getOrElse {

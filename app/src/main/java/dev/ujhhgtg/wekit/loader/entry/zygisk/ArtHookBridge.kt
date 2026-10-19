@@ -83,8 +83,14 @@ class ArtHookBridge : IHookBridge {
         return nativeDeoptimize(executable)
     }
 
-    /** Called after NativeLoader has loaded every module-provided native library. */
-    fun hideLoadedModuleLibraries(): Boolean = nativeHideLoadedModuleLibraries()
+    /**
+     * Called after NativeLoader has loaded every module-provided native library. [needles]
+     * are the derived extraction-root name and the payload APK's file name: hiding by these
+     * prefixes covers every extracted library plus the published APK copy, without ever
+     * matching on host files or on constants baked into the native side.
+     */
+    fun hideLoadedModuleLibraries(needles: List<String>): Boolean =
+        nativeHideLoadedModuleLibraries(needles.toTypedArray())
 
     override fun invokeOriginalMethod(method: Method, thisObject: Any?, args: Array<Any?>): Any? =
         ArtHookBridgeRuntime.invokeOriginal(method, thisObject, args)
@@ -119,7 +125,7 @@ class ArtHookBridge : IHookBridge {
         ): Method?
         @JvmStatic private external fun nativeDeoptimize(executable: Executable): Boolean
         @JvmStatic private external fun nativeAllocateInstance(clazz: Class<*>): Any
-        @JvmStatic private external fun nativeHideLoadedModuleLibraries(): Boolean
+        @JvmStatic private external fun nativeHideLoadedModuleLibraries(needles: Array<String>): Boolean
     }
 
     private class ArtUnhookHandle(

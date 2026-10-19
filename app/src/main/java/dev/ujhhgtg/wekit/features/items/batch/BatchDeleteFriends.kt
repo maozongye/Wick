@@ -15,12 +15,12 @@ import dev.ujhhgtg.wekit.ui.content.Button
 import dev.ujhhgtg.wekit.ui.content.ContactsSelector
 import dev.ujhhgtg.wekit.ui.content.TextButton
 import dev.ujhhgtg.wekit.ui.utils.showComposeDialog
+import dev.ujhhgtg.wekit.utils.BehaviorPacing
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.android.showToast
 import dev.ujhhgtg.wekit.utils.android.showToastSuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 object BatchDeleteFriends : ClickableFeature() {
@@ -30,12 +30,17 @@ object BatchDeleteFriends : ClickableFeature() {
     override val categoryIds = listOf(FeatureCategoryIds.BATCH)
     override val descriptionRes = R.string.feature_batch_delete_friends_description
 
+    override val automationRisk = true
+
     private const val TAG = "BatchDeleteFriends"
 
     override val noSwitchWidget = true
 
-    /** Space out deletions to avoid WeChat's server-side rate limiting. */
-    private const val DELETE_INTERVAL_MS = 1500L
+    /** Humanised pacing and hard quotas for batch deletions. */
+    private const val DELETE_MEDIAN_MS = 5_000L
+    private const val DELETE_WINDOW_LIMIT = 15
+    private const val DELETE_WINDOW_MS = 60 * 60 * 1000L
+    private const val DELETE_DAILY_LIMIT = 50
 
     override fun onClick(context: ComponentActivity) {
         val friends = WeDatabaseApi.getFriends()
@@ -89,24 +94,31 @@ object BatchDeleteFriends : ClickableFeature() {
 
     private fun deleteFriends(wxIds: Set<String>, mode: WeContactApi.DeleteMode) {
         CoroutineScope(Dispatchers.IO).launch {
+            val allowed = wxIds.takeWhile {
+                BehaviorPacing.reserve("delete_friend", DELETE_WINDOW_LIMIT, DELETE_WINDOW_MS) &&
+                    BehaviorPacing.reserveDaily("delete_friend", DELETE_DAILY_LIMIT)
+            }
+            if (allowed.size < wxIds.size) {
+                WeLogger.w(TAG, "delete quota reached; ${wxIds.size - allowed.size} of ${wxIds.size} deletions were skipped")
+            }
             showToastSuspend(
                 localizedBatchQuantity(
                     R.plurals.batch_delete_friends_progress,
-                    wxIds.size,
-                    wxIds.size,
+                    allowed.size,
+                    allowed.size,
                 ),
             )
 
             var success = 0
-            wxIds.forEachIndexed { index, wxId ->
+            allowed.forEachIndexed { index, wxId ->
                 if (WeContactApi.deleteContact(wxId, mode)) success++
-                WeLogger.i(TAG, "deleted contact $wxId ($success/${wxIds.size})")
-                if (index < wxIds.size - 1) delay(DELETE_INTERVAL_MS)
+                WeLogger.i(TAG, "deleted contact $wxId ($success/${allowed.size})")
+                if (index < allowed.size - 1) BehaviorPacing.pause(DELETE_MEDIAN_MS)
             }
 
             showToastSuspend(
                 localizedBatchQuantity(
-                    if (success == wxIds.size) R.plurals.batch_delete_friends_done
+                    if (success == allowed.size) R.plurals.batch_delete_friends_done
                     else R.plurals.batch_delete_friends_partial,
                     wxIds.size,
                     success,

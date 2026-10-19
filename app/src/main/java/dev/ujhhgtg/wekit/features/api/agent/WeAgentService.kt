@@ -259,7 +259,8 @@ object WeAgentService : TriggerManager.TriggerHost {
         WeKitDatabase.instance
         linuxEnvironmentManager.initialize()
         WeAgentSettings.load()
-        toolBridgeServer.start()
+        // The tool bridge binds lazily on first endpoint request; opening a loopback listener
+        // for every process start would leave an idle fingerprint behind.
 
         // Bring up MCP providers and keep the registry's MCP set in sync.
         McpClientManager.onProvidersChanged = {

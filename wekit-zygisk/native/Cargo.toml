@@ -5,7 +5,7 @@ edition = "2024"
 build = "build.rs"
 
 [lib]
-name = "wekit_zygisk"
+name = "wick_zygisk"
 crate-type = ["cdylib"]
 
 [dependencies]

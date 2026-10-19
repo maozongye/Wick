@@ -14,7 +14,7 @@ import dev.ujhhgtg.wekit.dexkit.abc.IResolveDex
 import dev.ujhhgtg.wekit.dexkit.dsl.data
 import dev.ujhhgtg.wekit.dexkit.dsl.dexClass
 import dev.ujhhgtg.wekit.dexkit.dsl.dexMethod
-import dev.ujhhgtg.wekit.features.core.ApiFeature
+import dev.ujhhgtg.wekit.features.core.LazyFeature
 import dev.ujhhgtg.wekit.features.core.FeatureCategoryIds
 import dev.ujhhgtg.wekit.utils.HookHandle
 import dev.ujhhgtg.wekit.utils.HookParam
@@ -28,7 +28,7 @@ import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
-object WeHomeScreenPopupMenuApi : ApiFeature(), IResolveDex {
+object WeHomeScreenPopupMenuApi : LazyFeature(), IResolveDex {
 
     override val technicalId = "首页菜单服务"
     override val nameRes = R.string.feature_we_home_screen_popup_menu_api_name
@@ -51,6 +51,9 @@ object WeHomeScreenPopupMenuApi : ApiFeature(), IResolveDex {
 
     fun addProvider(provider: IMenuItemsProvider) {
         providers.addIfAbsent(provider)
+
+        // First consumer arms the API; until then no hook is installed.
+        arm()
     }
 
     fun removeProvider(provider: IMenuItemsProvider) {
@@ -130,7 +133,7 @@ object WeHomeScreenPopupMenuApi : ApiFeature(), IResolveDex {
         }
     }
 
-    override fun onEnable() {
+    override fun installHooks() {
         // WeChat 8.0.70 moved this to com.tencent.mm.ui.HomeUI
         methodAddItem.hookAfter {
             var thisObj = thisObject!!

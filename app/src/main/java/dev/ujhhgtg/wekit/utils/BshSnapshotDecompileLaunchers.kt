@@ -58,11 +58,11 @@ fun ComponentActivity.registerBshSnapshotDecompileLaunchers(
     ) { uri: Uri? ->
         if (uri != null) {
             try {
-                Log.i(BuildConfig.TAG, "file $uri chosen")
+                Log.i(BuildConfig.INTERNAL_TAG, "file $uri chosen")
                 contentResolver.openInputStream(uri)?.use { inputStream ->
-                    Log.i(BuildConfig.TAG, "decompiling file...")
+                    Log.i(BuildConfig.INTERNAL_TAG, "decompiling file...")
                     val result = BshSnapshotDecompiler.decompileStream(inputStream).trim()
-                    Log.i(BuildConfig.TAG, "decompiled successfully (${result.length} chars)")
+                    Log.i(BuildConfig.INTERNAL_TAG, "decompiled successfully (${result.length} chars)")
                     if (result.isEmpty()) {
                         val context = localizedContext()
                         showToast(context, context.getString(R.string.noncompose_bsh_empty_result))
@@ -74,7 +74,7 @@ fun ComponentActivity.registerBshSnapshotDecompileLaunchers(
                     saveFileLauncher.launch("$inputName.java")
                 }
             } catch (ex: Exception) {
-                Log.e(BuildConfig.TAG, "exception thrown", ex)
+                Log.e(BuildConfig.INTERNAL_TAG, "exception thrown", ex)
                 val context = localizedContext()
                 showToast(
                     context,

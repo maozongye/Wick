@@ -1,5 +1,6 @@
 package dev.ujhhgtg.wekit.agent.environment
 
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import dev.ujhhgtg.wekit.utils.fs.copyTo
 import dev.ujhhgtg.wekit.utils.fs.copyFrom
 import kotlin.io.path.createDirectories
@@ -59,7 +60,7 @@ class NativeBackend constructor(
     ): ExecResult = withContext(Dispatchers.IO) {
         require(timeoutMillis in 1..MAX_TIMEOUT_MILLIS) { "timeout must be between 1 and $MAX_TIMEOUT_MILLIS ms" }
         val workingDirectory = Paths.get(snapshot.workingDirectory).toRealPath()
-        val outputDirectory = workingDirectory.resolve(".weagent/outputs")
+        val outputDirectory = workingDirectory.resolve("${AgentPaths.dir}/outputs")
         outputDirectory.createDirectories()
         val stdoutFile = createTempFile(outputDirectory, "exec-", ".stdout")
         val stderrFile = createTempFile(outputDirectory, "exec-", ".stderr")
@@ -146,7 +147,7 @@ class NativeBackend constructor(
             } catch (error: Throwable) {
                 failure.compareAndSet(null, error)
             }
-        }.apply { name = "wekit-owned-process-output"; start() }
+        }.apply { name = BuildFingerprint.threadName("proc-out"); start() }
 
     override suspend fun readUtf8(path: String, maxBytes: Long): String = withContext(Dispatchers.IO) {
         require(maxBytes > 0)
@@ -188,7 +189,7 @@ class NativeBackend constructor(
                 throw IllegalStateException("cannot read mode for existing file ${request.path}", error)
             }
         } else null
-        val temporary = createTempFile(parent, ".weagent-edit-", ".tmp")
+        val temporary = createTempFile(parent, AgentPaths.editTempPrefix, ".tmp")
         try {
             temporary.writeText(updated, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)
             try {
@@ -207,7 +208,7 @@ class NativeBackend constructor(
 
     override suspend fun ensureBridge(): BridgeInstallArtifact = withContext(Dispatchers.IO) {
         val packaged = NativeLoader.invokeToolExecutable()
-        val bin = Paths.get(snapshot.workingDirectory).resolve(".weagent/bin")
+        val bin = Paths.get(snapshot.workingDirectory).resolve("${AgentPaths.dir}/bin")
         bin.createDirectories()
         val link = bin.resolve("invoke_tool")
         if (link.isSymbolicLink() && link.readSymbolicLink() != packaged.toPath()) {

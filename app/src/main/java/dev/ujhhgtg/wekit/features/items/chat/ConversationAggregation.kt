@@ -77,6 +77,7 @@ import dev.ujhhgtg.wekit.data.JsonDataMigration
 import dev.ujhhgtg.wekit.data.WeKitDatabase
 import kotlinx.coroutines.runBlocking
 import dev.ujhhgtg.wekit.utils.android.showToast
+import dev.ujhhgtg.wekit.utils.BuildFingerprint
 import dev.ujhhgtg.wekit.utils.captureOriginalMethod
 import dev.ujhhgtg.wekit.utils.reflection.BString
 import kotlinx.coroutines.CoroutineScope
@@ -504,7 +505,7 @@ object ConversationAggregation : ClickableFeature(),
     }
 
     private fun startRefreshThread() {
-        val thread = HandlerThread("wekit-folder-refresh").also {
+        val thread = HandlerThread(BuildFingerprint.threadName("folder")).also {
             it.start()
             refreshThread = it
         }

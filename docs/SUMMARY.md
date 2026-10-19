@@ -35,7 +35,6 @@
 * [表情游戏控制](features/chat/emoji-game-control.md)
 * [爆破群成员实名首字](features/chat/exploit-group-member-real-names-first-char.md)
 * [伪造聊天记录消息](features/chat/fabricate-chat-history-message.md)
-* [伪装语音时长](features/chat/fake-voice-duration.md)
 * [转发收藏语音](features/chat/forward-favorite-voices.md)
 * [隐藏发送消息头像](features/chat/hide-outgoing-messages-avatar.md)
 * [清空未读](features/chat/mark-all-as-read.md)
@@ -54,7 +53,6 @@
 * [贴纸包同步](features/chat/stickers-sync.md)
 * [左划引用消息](features/chat/swipe-to-quote.md)
 * [显隐全部对话](features/chat/toggle-all-conversations-visibility.md)
-* [虚拟视频通话](features/chat/virtual-voip-video.md)
 
 ## 联系人与群组
 
@@ -73,7 +71,6 @@
 ## 朋友圈
 
 * [拦截朋友圈删除](features/moments/anti-moments-delete.md)
-* [朋友圈伪集赞](features/moments/fake-moments-likes.md)
 * [朋友圈底部详细信息](features/moments/display-details.md)
 * [消息转圈](features/moments/forward-messages-to-moments.md)
 * [朋友圈查询增强](features/moments/enhance-query.md)
@@ -82,11 +79,6 @@
 
 ## 红包与支付
 
-* [自动抢红包](features/payment/auto-open-red-packets.md)
-* [自动接收转账](features/payment/auto-accept-transfers.md)
-* [指纹支付](features/payment/fingerprint-pay.md)
-* [修改转账显示余额](features/payment/modify-transfer-wallet-balance-display.md)
-* [修改显示余额](features/payment/modify-wallet-balance-display.md)
 * [允许领取私聊红包](features/payment/allow-private-chat-receive-outgoing-red-packets.md)
 
 ## 界面美化
@@ -104,7 +96,6 @@
 ## 系统与隐私
 
 * [API 服务器](features/system/api-server.md)
-* [自动批准设备登录](features/system/auto-approve-device-login.md)
 * [清理缓存垃圾](features/system/auto-clean-cache.md)
 * [禁止屏幕高亮度](features/system/disable-high-brightness.md)
 * [禁用微信热更新](features/system/disable-host-hot-updates.md)
@@ -116,17 +107,12 @@
 * [去除文章广告](features/system/remove-article-ads.md)
 * [移除分享签名校验](features/system/remove-external-app-sharing-signature-verify.md)
 * [移除二维码扫描限制](features/system/remove-qr-code-scan-limit.md)
-* [强制平板模式](features/system/force-tablet-mode.md)
 * [链接跳转系统打开方式](features/system/link-external-app-jump.md)
-* [修改运动步数](features/system/modify-sports-step-count.md)
-* [虚拟定位](features/system/fake-location.md)
 * [灰度测试管理器](features/system/feature-flag-manager.md)
 * [隐藏模块应用](features/system/hide-module-from-app-list.md)
 * [省电模式](features/system/power-saver.md)
 * [预见性返回动画](features/system/predictive-back-gestures.md)
 * [阻止微信清理模块数据](features/system/prevent-module-data-deletion.md)
-* [禁止微信检测 Xposed](features/system/prevent-xposed-detection.md)
-* [环境伪装](features/system/spoof-environment.md)
 * [恢复旧版「我」界面卡包](features/system/use-legacy-wallet-view-in-me-page.md)
 
 ## 通知
@@ -155,7 +141,6 @@
 ## 个人资料
 
 * [设置微信昵称](features/profile/set-profile-nickname.md)
-* [上传透明头像](features/profile/upload-transparent-avatars.md)
 * [移除个性签名限制](features/profile/remove-signature-limits.md)
 
 ## 调试

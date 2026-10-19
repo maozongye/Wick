@@ -46,3 +46,6 @@ docs/superpowers/
 
 # Extension-pack build outputs (./x extensions pack/lock)
 dist/
+
+# Per-build identity nonce (see HARDENING.md)
+/.wekit-nonce

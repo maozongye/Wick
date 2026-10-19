@@ -17,8 +17,14 @@ abstract class SwitchFeature : BaseFeature() {
      */
     open val defaultEnabled: Boolean = false
 
-    /** Whether the feature should be active at startup, given the cached preference. */
-    protected open val shouldEnableOnStartup: Boolean
+    /**
+     * Whether the feature should be active at startup, given the cached preference.
+     *
+     * Public because [FeaturesLoader] consults it to decide which features are worth resolving
+     * Dex targets for: a feature that will not start installs no hooks, so resolving its targets
+     * would only add startup cost and detection surface.
+     */
+    open val shouldEnableOnStartup: Boolean
         get() = _isEnabled
 
     fun loadPersistedState() {

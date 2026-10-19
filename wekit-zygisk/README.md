@@ -19,7 +19,7 @@ Open the WeKit module page in KernelSU to manage injection targets.
   the current result, preserves switches for surviving rows, and disables newly
   discovered rows. The WebUI intentionally has no manual add or delete action.
 
-The persisted target list is `/data/adb/wekit_zygisk/injection-targets.tsv`. Module
+The persisted target list is `/data/adb/wick_zygisk/injection-targets.tsv`. Module
 updates retain it; uninstall removes it without touching app data.
 
 ## Installation and updates
@@ -103,7 +103,7 @@ not LSPlant; initialize it with `git submodule update --init third_party/xz-embe
 The Zygisk lifecycle, companion IPC, payload loading, JNI registration and ART
 symbol resolution remain in Rust. A small C ABI bridge statically links
 [LSPlant](https://github.com/LSPosed/LSPlant), including the C++ runtime, into the
-existing `libwekit_zygisk.so`. LSPlant calls Rust function pointers for native
+existing `libwick_zygisk.so`. LSPlant calls Rust function pointers for native
 inline hook installation and removal; Dobby is no longer a build dependency.
 The LSPlant gitlink remains pinned to `d8b5d1dbb664abc606644036822e4bb64547edf6`;
 its LGPL-3.0 license remains in the submodule.

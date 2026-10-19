@@ -40,6 +40,14 @@ object WeDatabaseListenerApi : ApiFeature() {
     private val updateListeners = CopyOnWriteArrayList<IUpdateListener>()
     private val queryListeners = CopyOnWriteArrayList<IQueryListener>()
 
+    /**
+     * Registers a listener and installs the WCDB hooks on first use.
+     *
+     * The hooks are deliberately NOT installed at startup: hooking the host's insert/update/
+     * query path for every process launch, when most users have no listener-driven feature
+     * enabled, is a standing hook surface with no benefit. Installing on first registration
+     * keeps the hooks installed only while something actually consumes the events.
+     */
     fun addListener(listener: Any) {
         if (listener is IInsertListener) {
             insertListeners.add(listener)
@@ -50,6 +58,7 @@ object WeDatabaseListenerApi : ApiFeature() {
         if (listener is IQueryListener) {
             queryListeners.add(listener)
         }
+        ensureHooksInstalled()
     }
 
     fun removeListener(listener: Any) {
@@ -65,9 +74,22 @@ object WeDatabaseListenerApi : ApiFeature() {
     }
 
     override fun onEnable() {
-        hookDatabaseInsert()
-        hookDatabaseUpdate()
-        hookDatabaseQuery()
+        // Hooks are installed lazily by [addListener]; an enabled-but-unused API must not
+        // touch the host's database path at all.
+    }
+
+    @Volatile
+    private var hooksInstalled = false
+
+    private fun ensureHooksInstalled() {
+        if (hooksInstalled) return
+        synchronized(this) {
+            if (hooksInstalled) return
+            hookDatabaseInsert()
+            hookDatabaseUpdate()
+            hookDatabaseQuery()
+            hooksInstalled = true
+        }
     }
 
     override fun onDisable() {

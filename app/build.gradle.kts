@@ -4,6 +4,7 @@ import com.android.build.api.variant.BuildConfigField
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import java.util.UUID
 
 plugins {
     id("dev.ujhhgtg.lsparanoid") version "0.13.3"
@@ -74,6 +75,30 @@ val gitHash = providers.exec {
     commandLine("git", "rev-parse", "--short=8", "HEAD")
 }.standardOutput.asText.map { it.trim() }
 
+// ── Build-time identity ───────────────────────────────────────────────────────
+// Identifiers that could be fingerprinted (application id suffix, log tag, on-disk names)
+// are derived from one per-build nonce, so two builds never share a constant. The nonce is
+// persisted in .wekit-nonce (gitignored) so incremental builds stay installable over each
+// other; delete that file to roll a fresh identity. WEKIT_NONCE overrides it.
+//
+// -PwekitStablePackage=true keeps the published application id (required if you want
+// in-place upgrades over an existing installation).
+val nonceFile = rootProject.layout.projectDirectory.file(".wekit-nonce").asFile
+val buildNonce: String = System.getenv("WEKIT_NONCE")?.takeIf { it.isNotBlank() }
+    ?: nonceFile.takeIf { it.isFile }?.readText()?.trim()?.takeIf { it.isNotBlank() }
+    ?: UUID.randomUUID().toString().replace("-", "").also {
+        runCatching { nonceFile.writeText(it) }
+    }
+
+fun deriveFingerprint(tag: String): String {
+    val mac = javax.crypto.Mac.getInstance("HmacSHA256")
+    mac.init(javax.crypto.spec.SecretKeySpec(buildNonce.toByteArray(), "HmacSHA256"))
+    return mac.doFinal(tag.toByteArray()).joinToString("") { "%02x".format(it) }.take(8)
+}
+
+val stablePackage = providers.gradleProperty("wekitStablePackage").orNull?.toBoolean() ?: false
+val fileLogging = providers.environmentVariable("WEKIT_FILE_LOG").orNull?.toBoolean() ?: false
+
 android {
     namespace = libs.versions.namespace.get()
     compileSdk {
@@ -84,7 +109,18 @@ android {
     ndkVersion = libs.versions.ndk.get()
 
     defaultConfig {
-        applicationId = libs.versions.namespace.get()
+        // Source package (namespace) stays fixed; only the installed identity is derived.
+        // Java package segments may not start with a digit; pin an 'x' prefix since
+        // deriveFingerprint() emits raw hex that would otherwise start with 0-9 ~5/8 of builds.
+        applicationId = buildString {
+            append(libs.versions.namespace.get())
+            if (!stablePackage) append(".x").append(deriveFingerprint("pkg"))
+        }
+
+        // Task affinity is visible to the host through ActivityManager: derive it so a
+        // second build never shares the same affinity string.
+        manifestPlaceholders["wekitTaskAffinity"] =
+            "${libs.versions.namespace.get()}.x${deriveFingerprint("affinity")}"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
 
@@ -93,7 +129,12 @@ android {
             abiFilters += "arm64-v8a"
         }
 
-        buildConfigField("String", "TAG", "\"WeKit\"")
+        // TAG is user-visible product copy (about screen, widget titles); it is not a
+        // runtime fingerprint. INTERNAL_TAG is what reaches logcat and internal lookups.
+        buildConfigField("String", "TAG", "\"Wick\"")
+        buildConfigField("String", "BUILD_NONCE", "\"$buildNonce\"")
+        buildConfigField("String", "INTERNAL_TAG", "\"${deriveFingerprint("tag")}\"")
+        buildConfigField("boolean", "FILE_LOGGING", fileLogging.toString())
         buildConfigField("long", "BUILD_TIMESTAMP", "${System.currentTimeMillis()}L")
     }
 
@@ -163,7 +204,7 @@ android {
 
         release {
             optimization.enable = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName(if (foundKeystore) "release" else "debug")
         }
     }
@@ -342,10 +383,21 @@ val generateScriptDepsDex = tasks.register<GenerateScriptDepsDexTask>("generateS
 
 // --- end tasks ---
 
+// -PwekitMinimal=true drops the debug feature pack at compile time: the generated registry
+// never references those classes, so R8 removes them from the artifact. Stronger than a
+// runtime off-switch, which leaves every class and hook site in the APK.
+val minimalBuild = providers.gradleProperty("wekitMinimal").orNull?.toBoolean() ?: false
+val excludedFeaturePackages = if (minimalBuild) {
+    "dev.ujhhgtg.wekit.features.items.debug"
+} else {
+    ""
+}
+
 ksp {
     // Room schema export for migration diffing
     arg("room.schemaLocation", "$projectDir/schemas")
     arg("room.generateKotlin", "true")
+    arg("wekit.excludedFeaturePackages", excludedFeaturePackages)
 }
 
 dependencies {
@@ -434,8 +486,6 @@ dependencies {
     implementation(libs.ktor.client.websockets)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.jsch)
-
-    implementation(libs.osmdroid.android)
 
     compileOnly(project(":libs:common:stubs"))
 

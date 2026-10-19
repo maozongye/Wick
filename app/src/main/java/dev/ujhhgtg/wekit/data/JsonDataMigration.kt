@@ -9,8 +9,6 @@ import dev.ujhhgtg.wekit.data.entity.RealNameScanProgressEntity
 import dev.ujhhgtg.wekit.data.structured.LegacyConversationCollections
 import dev.ujhhgtg.wekit.features.items.moments.MomentsAutomationSettings
 import dev.ujhhgtg.wekit.features.items.moments.StoredMomentAutomationConfig
-import dev.ujhhgtg.wekit.features.items.payment.RedPacketSettings
-import dev.ujhhgtg.wekit.features.items.payment.TransferSettings
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.fs.KnownPaths
 import dev.ujhhgtg.wekit.utils.fs.LegacyPaths
@@ -112,18 +110,11 @@ object JsonDataMigration {
                 val values = raw?.let { DefaultJson.decodeFromString<Map<String, Int>>(it) }.orEmpty()
                 commit(db, source) { values.forEach { (key, value) -> simple.putScanProgress(RealNameScanProgressEntity(key, value)) } }
             }
-            "json/RedPacketSettings" -> {
-                val value = if (raw == null) RedPacketSettings.migrateLegacyConfig(read(db, oldRedPacketMembers))
-                    else DefaultJson.decodeFromString<RedPacketSettings.StoredConfig>(raw)
-                require(value.version == 1) { "Unsupported red-packet configuration" }
-                commit(db, source) { automation.insertRedPacketConfig(value) }
-            }
-            "json/TransferSettings" -> {
-                val value = if (raw == null) TransferSettings.migrateLegacyConfig()
-                    else DefaultJson.decodeFromString<TransferSettings.StoredConfig>(raw)
-                require(value.version == 1) { "Unsupported transfer configuration" }
-                commit(db, source) { automation.insertTransferConfig(value) }
-            }
+            // The red-packet and auto-transfer features were removed from this build. Their
+            // legacy JSON is deliberately NOT imported and NOT deleted: an older build (or a
+            // downgrade) still owns those tables, and silently dropping the only copy of the
+            // user's configuration is worse than leaving an unused file behind.
+            "json/RedPacketSettings", "json/TransferSettings" -> Unit
             "json/AutoLikeMomentsSettings", "json/AutoRepostMomentsSettings" -> {
                 val like = source.key == "AutoLikeMomentsSettings"
                 val value = if (raw == null) {

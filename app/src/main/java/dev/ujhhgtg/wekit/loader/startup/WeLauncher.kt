@@ -21,6 +21,10 @@ object WeLauncher {
 
         ParcelableFixer.init()
 
+        // Relocate the module root before anything opens a database or a log writer: the
+        // migration renames the tree, which must not race an open SQLite handle.
+        KnownPaths.ensureRootReady()
+
         DexCacheManager.init(
             KnownPaths.hostVersionKey()
         )

@@ -52,7 +52,8 @@ object NukeGitHubContributors {
             .url(CONTRIBUTORS_URL)
             .header("Accept", "application/vnd.github+json")
             .header("X-GitHub-Api-Version", "2022-11-28")
-            .header("User-Agent", "WeKit")
+            // GitHub requires a UA but nothing about it; do not advertise the module.
+            .header("User-Agent", "okhttp/4.12.0")
             .build()
         val contributors = httpClient.newCall(request).execute().use { response ->
             check(response.isSuccessful) { "GitHub contributors request failed: HTTP ${response.code}" }

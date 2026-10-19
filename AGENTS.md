@@ -28,7 +28,7 @@
   never modify or repack the signed output. There is no separate `zygisk build` command.
 - JDK 21
 - **Gradle does NOT build the Rust native lib.** `./gradlew assemble*` only packages whatever
-  prebuilt `libwekit_native.so` already sits in `app/src/main/jniLibs/<abi>/`. Compiling
+  prebuilt `libwick_native.so` already sits in `app/src/main/jniLibs/<abi>/`. Compiling
   `app/src/main/rust/wekit-native` and refreshing those `.so` files is xtask's job
   (`task_build_native`), so **always go through `./x`** — running Gradle directly will silently ship
   a stale native lib. Requires a Rust toolchain + the Android NDK and its Rust targets;

@@ -42,13 +42,13 @@ import dev.ujhhgtg.wekit.features.items.AutomationTimeRangeRule
 import dev.ujhhgtg.wekit.features.items.AutomationToggleRule
 import dev.ujhhgtg.wekit.features.items.automationKeywordSummary
 import dev.ujhhgtg.wekit.features.items.formatAutomationMinute
-import dev.ujhhgtg.wekit.features.items.payment.PaymentErrorRow
-import dev.ujhhgtg.wekit.features.items.payment.PaymentNavigationRow
-import dev.ujhhgtg.wekit.features.items.payment.PaymentRuleRow
-import dev.ujhhgtg.wekit.features.items.payment.PaymentTextEditDialog
-import dev.ujhhgtg.wekit.features.items.payment.PaymentTextEditMode
-import dev.ujhhgtg.wekit.features.items.payment.keywordItems
-import dev.ujhhgtg.wekit.features.items.payment.timeRangeItems
+import dev.ujhhgtg.wekit.features.items.automation.AutomationErrorRow
+import dev.ujhhgtg.wekit.features.items.automation.AutomationNavigationRow
+import dev.ujhhgtg.wekit.features.items.automation.AutomationRuleRow
+import dev.ujhhgtg.wekit.features.items.automation.AutomationTextEditDialog
+import dev.ujhhgtg.wekit.features.items.automation.AutomationTextEditMode
+import dev.ujhhgtg.wekit.features.items.automation.keywordItems
+import dev.ujhhgtg.wekit.features.items.automation.timeRangeItems
 import dev.ujhhgtg.wekit.data.KvStore
 import dev.ujhhgtg.wekit.ui.content.AlertDialogContent
 import dev.ujhhgtg.wekit.ui.content.Button
@@ -239,14 +239,14 @@ class MomentsAutomationSettings private constructor(
                 text = {
                     SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
                         item {
-                            PaymentNavigationRow(
+                            AutomationNavigationRow(
                                 title = stringResource(R.string.moments_automation_global_settings),
                                 description = stringResource(R.string.moments_automation_global_summary),
                                 onClick = { showGlobalDialog(context, onSettingsChanged) },
                             )
                         }
                         item {
-                            PaymentNavigationRow(
+                            AutomationNavigationRow(
                                 title = stringResource(R.string.moments_automation_contact_settings),
                                 description = stringResource(R.string.moments_automation_contact_summary),
                                 onClick = { showContactSelector(context, onSettingsChanged) },
@@ -264,12 +264,12 @@ class MomentsAutomationSettings private constructor(
             val saveState = rememberAutomationSaveState()
             androidx.compose.runtime.SideEffect { dialog.setCancelable(!saveState.saving) }
             var draft by remember { mutableStateOf(loadConfig().global) }
-            var editText by remember { mutableStateOf<PaymentTextEditMode?>(null) }
+            var editText by remember { mutableStateOf<AutomationTextEditMode?>(null) }
             val localizedContext by rememberUpdatedState(LocalWeKitLocalizedContext.current)
             val validationError = validate(localizedContext, draft)
             val editMode = editText
             if (editMode != null) {
-                PaymentTextEditDialog(editMode, onClose = { editText = null })
+                AutomationTextEditDialog(editMode, onClose = { editText = null })
                 return@showComposeDialog
             }
             AlertDialogContent(
@@ -361,13 +361,13 @@ class MomentsAutomationSettings private constructor(
             val saveState = rememberAutomationSaveState()
             androidx.compose.runtime.SideEffect { dialog.setCancelable(!saveState.saving) }
             var draft by remember { mutableStateOf(initial) }
-            var editText by remember { mutableStateOf<PaymentTextEditMode?>(null) }
+            var editText by remember { mutableStateOf<AutomationTextEditMode?>(null) }
             val effective = parent.apply(draft)
             val localizedContext by rememberUpdatedState(LocalWeKitLocalizedContext.current)
             val validationError = validate(localizedContext, effective, draft.keys())
             val editMode = editText
             if (editMode != null) {
-                PaymentTextEditDialog(editMode, onClose = { editText = null })
+                AutomationTextEditDialog(editMode, onClose = { editText = null })
                 return@showComposeDialog
             }
             AlertDialogContent(
@@ -414,7 +414,7 @@ class MomentsAutomationSettings private constructor(
         onActivate: (RuleKey) -> Unit,
         onReset: (RuleKey) -> Unit,
         onChange: (RuleKey, MomentAutomationRuleSet) -> Unit,
-        onEditText: (PaymentTextEditMode) -> Unit,
+        onEditText: (AutomationTextEditMode) -> Unit,
     ) {
         val isGlobal = overriddenKeys == null
         fun overridden(key: RuleKey): Boolean? = overriddenKeys?.let { key in it }
@@ -424,7 +424,7 @@ class MomentsAutomationSettings private constructor(
             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
         ) {
             SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
-            item(key = "process") { PaymentRuleRow(
+            item(key = "process") { AutomationRuleRow(
                 title = stringResource(
                     if (includeAction) R.string.moments_automation_default_auto_like
                     else R.string.moments_automation_default_auto_repost
@@ -446,7 +446,7 @@ class MomentsAutomationSettings private constructor(
             ) }
 
             if (includeAction) {
-                item(key = "action") { PaymentRuleRow(
+                item(key = "action") { AutomationRuleRow(
                     title = stringResource(R.string.moments_automation_action_type),
                     summary = stringResource(
                         if (!rules.action.enabled) R.string.moments_automation_default_like_action
@@ -490,7 +490,7 @@ class MomentsAutomationSettings private constructor(
                 }
             }
 
-            item(key = "mode") { PaymentRuleRow(
+            item(key = "mode") { AutomationRuleRow(
                 title = stringResource(R.string.moments_automation_processing_mode),
                 summary = when {
                     !rules.mode.enabled -> stringResource(R.string.moments_automation_when_seen_only)
@@ -534,7 +534,7 @@ class MomentsAutomationSettings private constructor(
                     )
             }
 
-            item(key = "interval") { PaymentRuleRow(
+            item(key = "interval") { AutomationRuleRow(
                 title = stringResource(R.string.moments_automation_interval),
                 summary = if (rules.interval.enabled) {
                     stringResource(R.string.moments_automation_interval_value, rules.interval.milliseconds.ifBlank { "0" })
@@ -569,7 +569,7 @@ class MomentsAutomationSettings private constructor(
                 }
             }
 
-            item(key = "time_range") { PaymentRuleRow(
+            item(key = "time_range") { AutomationRuleRow(
                 title = stringResource(R.string.moments_automation_time_range),
                 summary = if (rules.timeRange.enabled) {
                     "${formatAutomationMinute(rules.timeRange.startMinute)} - ${formatAutomationMinute(rules.timeRange.endMinute)}"
@@ -590,7 +590,7 @@ class MomentsAutomationSettings private constructor(
                 onChange = { onChange(RuleKey.TIME_RANGE, rules.copy(timeRange = it)) },
             )
 
-            item(key = "keyword") { PaymentRuleRow(
+            item(key = "keyword") { AutomationRuleRow(
                 title = stringResource(R.string.moments_automation_content_keywords),
                 summary = automationKeywordSummary(rules.keyword, stringResource(R.string.moments_automation_keyword_unrestricted)),
                 checked = rules.keyword.enabled,
@@ -612,7 +612,7 @@ class MomentsAutomationSettings private constructor(
                 onEditText = onEditText,
             )
 
-            item(key = "content_type") { PaymentRuleRow(
+            item(key = "content_type") { AutomationRuleRow(
                 title = stringResource(R.string.moments_automation_content_type),
                 summary = if (rules.contentType.enabled) {
                     pluralStringResource(R.plurals.moments_automation_selected_type_count, rules.contentType.typeIds.size, rules.contentType.typeIds.size)
@@ -654,7 +654,7 @@ class MomentsAutomationSettings private constructor(
                 }
             }
 
-            item(key = "maximum_age") { PaymentRuleRow(
+            item(key = "maximum_age") { AutomationRuleRow(
                 title = stringResource(R.string.moments_automation_maximum_age),
                 summary = if (rules.maximumAge.enabled) {
                     stringResource(R.string.moments_automation_maximum_age_value, rules.maximumAge.maximumHours.ifBlank { "0" })
@@ -697,7 +697,7 @@ class MomentsAutomationSettings private constructor(
             }
 
             validationError?.let { error ->
-                item(key = "validation_error") { PaymentErrorRow(error) }
+                item(key = "validation_error") { AutomationErrorRow(error) }
             }
             }
         }

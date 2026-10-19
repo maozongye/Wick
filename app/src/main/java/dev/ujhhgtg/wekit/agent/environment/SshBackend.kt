@@ -29,7 +29,7 @@ class SshBackend(
                     environmentVariables.getValue("WEAGENT_BRIDGE_TOKEN"),
                 ).environment(forward.remotePort)
             }
-            val outputDirectory = "${snapshot.workingDirectory.trimEnd('/')}/.weagent/outputs"
+            val outputDirectory = AgentPaths.outputs(snapshot.workingDirectory.trimEnd('/'))
             val outputId = java.util.UUID.randomUUID().toString()
             val stdoutPath = "$outputDirectory/.exec-$outputId.stdout"
             val stderrPath = "$outputDirectory/.exec-$outputId.stderr"
@@ -123,7 +123,7 @@ class SshBackend(
 
     override suspend fun ensureBridge(): BridgeInstallArtifact {
         val home = connection.homeDirectory()
-        val upload = "$home/.weagent-invoke-tool-${java.util.UUID.randomUUID()}"
+        val upload = "$home/${AgentPaths.invokeToolUploadPrefix}${java.util.UUID.randomUUID()}"
         connection.upload(upload, REMOTE_HELPER.toByteArray(StandardCharsets.UTF_8))
         val install = connection.execute(
             """

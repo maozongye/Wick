@@ -70,11 +70,63 @@ extern "C" fn jni_allocate_instance(
     crate::art::allocate_instance(env, target_class)
 }
 
-extern "C" fn jni_hide_loaded_module_libraries(_env: *mut RawJNIEnv, _class: jclass) -> jboolean {
-    let ok = crate::so_hider::hide_path("libdexkit.so") >= 0
-        && crate::so_hider::hide_path("libwekit_native.so") >= 0
-        && crate::so_hider::hide_path("libmmkv.so") >= 0;
-    if ok { JNI_TRUE } else { JNI_FALSE }
+extern "C" fn jni_hide_loaded_module_libraries(
+    env: *mut RawJNIEnv,
+    _class: jclass,
+    needles: jobject,
+) -> jboolean {
+    unsafe {
+        let fns = *env;
+        let arr_cls = ((*fns).v1_6.FindClass)(env, c"java/lang/String".as_ptr());
+        if arr_cls.is_null() {
+            ((*fns).v1_6.ExceptionClear)(env);
+            return JNI_FALSE;
+        }
+        ((*fns).v1_6.DeleteLocalRef)(env, arr_cls);
+        let len = ((*fns).v1_6.GetArrayLength)(env, needles as jni::sys::jarray);
+        if len <= 0 {
+            return JNI_FALSE;
+        }
+        // Zygisk mode: the caller passes the derived extraction-root name and the payload
+        // APK's file name. Hiding by these caller-owned prefixes covers every extracted
+        // library plus the published APK copy, never matches host files, and keeps working
+        // when the library set changes — which the old fixed three-name list would miss.
+        let mut all_ok = true;
+        for i in 0..len {
+            let jstr = ((*fns).v1_6.GetObjectArrayElement)(env, needles as jni::sys::jobjectArray, i);
+            if jstr.is_null() {
+                all_ok = false;
+                continue;
+            }
+            let chars = ((*fns).v1_6.GetStringUTFChars)(env, jstr, std::ptr::null_mut());
+            if chars.is_null() {
+                ((*fns).v1_6.DeleteLocalRef)(env, jstr);
+                all_ok = false;
+                continue;
+            }
+            let needle = std::ffi::CStr::from_ptr(chars).to_string_lossy().into_owned();
+            ((*fns).v1_6.ReleaseStringUTFChars)(env, jstr, chars);
+            ((*fns).v1_6.DeleteLocalRef)(env, jstr);
+            if needle.is_empty() || crate::so_hider::hide_path(&needle) < 0 {
+                all_ok = false;
+            }
+        }
+        // Legacy branded copies from before the code_cache migration may still be mapped.
+        // The Zygisk companion library's location is decided by the root manager's layout.
+        if crate::so_hider::hide_path("wekit-bootstrap") < 0
+            || !hide_native_payload()
+        {
+            all_ok = false;
+        }
+        if all_ok { JNI_TRUE } else { JNI_FALSE }
+    }
+}
+
+/// Hides the Zygisk companion library itself, whose on-disk location is decided by the
+/// root manager's installation layout (`zygisk/arm64-v8a.so` under the module dir), so match
+/// by the fixed leaf names instead of a full path.
+fn hide_native_payload() -> bool {
+    crate::so_hider::hide_path("wick_zygisk") >= 0 || crate::so_hider::hide_path("zygisk/arm64") >= 0
 }
 
 // ── ZygiskEntry JNI implementations ──────────────────────────────────────────
@@ -398,7 +450,7 @@ pub unsafe fn register_hook_bridge_natives(env: *mut RawJNIEnv, class_loader: jo
         },
         JNINativeMethod {
             name: c"nativeHideLoadedModuleLibraries".as_ptr() as *mut c_char,
-            signature: c"()Z".as_ptr() as *mut c_char,
+            signature: c"([Ljava/lang/String;)Z".as_ptr() as *mut c_char,
             fnPtr: jni_hide_loaded_module_libraries as *mut c_void,
         },
     ];
