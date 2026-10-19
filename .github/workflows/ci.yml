@@ -74,6 +74,58 @@ jobs:
           export PATH="$PWD/wekit-zygisk/.venv/bin:$PATH"
           cargo test -p wekit-zygisk --lib
 
+  # Builds only the native libraries. `./x build --native-only` skips Gradle entirely, so
+  # it neither needs the private lsparanoid plugin nor a signed APK. This is what verifies
+  # the libwick_* rename actually produces the file names the loader expects.
+  native:
+    runs-on: ubuntu-latest
+    if: |
+      !startsWith(github.event.head_commit.message, '[skip ci]') &&
+      (github.event_name == 'pull_request' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: aarch64-linux-android
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install build tools
+        run: uv sync --locked --project wekit-zygisk --group build
+
+      - name: Build native libraries only
+        run: |
+          export PATH="$PWD/wekit-zygisk/.venv/bin:$PATH"
+          ./x build --native-only
+
+      - name: Verify the produced library names
+        run: |
+          set -euo pipefail
+          # The Kotlin loaders and the Zygisk installer reference these exact names; a
+          # mismatch here is an UnsatisfiedLinkError at runtime.
+          for name in libwick_native.so libwick_zygisk.so; do
+            f=$(find app/src/main/jniLibs -name "$name" -type f | head -1)
+            if [ -z "$f" ]; then
+              echo "::error::$name was not produced; the libwick_* rename is inconsistent"
+              echo "Produced files:"
+              find app/src/main/jniLibs -type f || true
+              exit 1
+            fi
+            echo "found $f ($(stat -c%s "$f") bytes)"
+          done
+          if find app/src/main/jniLibs -name 'libwekit_*' -type f | grep -q .; then
+            echo "::error::stale libwekit_* artifacts are still being produced"
+            exit 1
+          fi
+          echo "Native library names match the loaders."
+
   # The upstream author publishes the lsparanoid Gradle plugin only to a private package
   # registry. Without it Gradle fails at configuration time, so probe for it first and skip
   # the build jobs with an explicit reason instead of showing a red build caused by a
