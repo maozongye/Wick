@@ -97,6 +97,13 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
 
+      - name: Install system build dependencies
+        # silk-v3-sys runs bindgen, which needs the 32-bit glibc headers present on the
+        # runner to resolve stdint.h; without them the bindings generation aborts.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-multilib libc6-dev-i386
+
       - name: Install build tools
         run: uv sync --locked --project wekit-zygisk --group build
 
