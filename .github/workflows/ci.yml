@@ -31,12 +31,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'workflow_dispatch' && github.repository == 'Ujhhgtg/WeKit-Dev') ||
       (
-        !startsWith(github.event.head_commit.message, '[skip ci]') && 
+        !startsWith(github.event.head_commit.message, '[skip ci]') &&
         (
           github.event_name == 'pull_request' ||
-          (github.repository == 'Ujhhgtg/WeKit-Dev' && github.ref == 'refs/heads/master')
+          github.event_name == 'workflow_dispatch' ||
+          github.ref == 'refs/heads/master'
         )
       )
     steps:
@@ -122,13 +122,30 @@ jobs:
           uv run --no-sync --project wekit-zygisk python wekit-zygisk/native/tests/arm64_relocation.py
           ./x i18n-check
 
-      - name: Decode keystore
+      # Forks usually have no signing secrets. Gate on the secret itself so a fork
+      # gets an unsigned build instead of failing on an empty keystore.
+      # Forks usually have no signing secrets. Probe for one first, because `secrets`
+      # context is not available in job/step `if` expressions.
+      - name: Check signing secret
+        id: signing
         if: github.event_name != 'pull_request'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No KEYSTORE_BASE64 secret; building unsigned."
+          fi
+
+      - name: Decode keystore
+        if: github.event_name != 'pull_request' && steps.signing.outputs.available == 'true'
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > $RUNNER_TEMP/wekit-keystore.jks
 
       - name: Build Release (Signed)
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.signing.outputs.available == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WEKIT_KEYSTORE_FILE: ${{ runner.temp }}/wekit-keystore.jks
@@ -138,7 +155,7 @@ jobs:
         run: ./x build --release
 
       - name: Build Release (Unsigned)
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || steps.signing.outputs.available != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./x build --release
@@ -192,7 +209,7 @@ jobs:
 
   dex-test:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.repository == 'Ujhhgtg/WeKit-Dev'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
     outputs:
       reports-available: ${{ steps.report-check.outputs.available }}
     steps:
