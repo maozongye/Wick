@@ -48,30 +48,53 @@ object ActivityProxy {
             val clazzActivityThread = Class.forName("android.app.ActivityThread")
             val currentActivityThread = ActivityThread.currentActivityThread()
 
-            // Hook Instrumentation
+            // Hook Instrumentation.
+            //
+            // Preferred path: hook newActivity/callActivityOnCreate, leaving the field holding
+            // the framework's own object so a getClass() integrity check finds nothing.
+            // Fallback only when the hook cannot be installed: replacing the field is
+            // detectable, but a module that cannot launch its own activities is worse.
             val mInstrumentationField = clazzActivityThread.getDeclaredField("mInstrumentation")
                 .makeAccessible()
             val instrumentation =
                 mInstrumentationField.get(currentActivityThread) as Instrumentation
-            if (instrumentation !is ProxyInstrumentation) {
+            if (instrumentation !is ProxyInstrumentation &&
+                !InstrumentationHooks.install(instrumentation)
+            ) {
+                WeLogger.w(TAG, "falling back to mInstrumentation field replacement")
                 mInstrumentationField.set(
                     currentActivityThread,
                     ProxyInstrumentation(instrumentation)
                 )
             }
 
-            // Hook Handler (mH)
-            val oriHandler = clazzActivityThread.getDeclaredField("mH")
-                .makeAccessible()
-                .get(currentActivityThread) as Handler
-            val callbackField = Handler::class.java.getDeclaredField("mCallback")
-                .makeAccessible()
-            val current = callbackField.get(oriHandler) as? Handler.Callback
-            if (current == null || current.javaClass.name != ProxyHandlerCallback::class.java.name) {
-                callbackField.set(oriHandler, ProxyHandlerCallback(current))
+            // Hook Handler (mH).
+            //
+            // Preferred path: hook ActivityThread$H.handleMessage, which leaves mCallback null
+            // as the framework does. Fallback replaces the field when the hook is unavailable.
+            if (!ActivityThreadMessageHooks.install()) {
+                WeLogger.w(TAG, "falling back to mH.mCallback field replacement")
+                val oriHandler = clazzActivityThread.getDeclaredField("mH")
+                    .makeAccessible()
+                    .get(currentActivityThread) as Handler
+                val callbackField = Handler::class.java.getDeclaredField("mCallback")
+                    .makeAccessible()
+                val current = callbackField.get(oriHandler) as? Handler.Callback
+                if (current == null || current.javaClass.name != ProxyHandlerCallback::class.java.name) {
+                    callbackField.set(oriHandler, ProxyHandlerCallback(current))
+                }
             }
 
-            hookIActivityManager()
+            // Redirect module launches at execStartActivity.
+            //
+            // Preferred path: hook the Instrumentation method every startActivity converges on,
+            // leaving the binder singletons untouched. Fallback installs the old proxies only
+            // when the hook is unavailable, because a module that cannot open its own screens
+            // is worse than one whose proxies are detectable.
+            if (!StartActivityHooks.install(instrumentation)) {
+                WeLogger.w(TAG, "falling back to IActivityManager proxies")
+                hookIActivityManager()
+            }
             hookPackageManager(ctx, currentActivityThread, clazzActivityThread)
 
             initialized = true
@@ -559,7 +582,8 @@ object ActivityProxy {
         }
     }
 
-    private object IntentTokenCache {
+    /** Shared with [InstrumentationHooks]; both recover the same token-keyed intent. */
+    object IntentTokenCache {
         private data class Entry(
             val intent: Intent,
             val timestamp: Long = System.currentTimeMillis()
