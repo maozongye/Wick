@@ -32,7 +32,7 @@ enum class AppThemeMode(val displayName: String) {
     }
 
     companion object {
-        fun fromName(value: String?) = entries.find { it.name == value } ?: SYSTEM
+        fun fromName(value: String?) = entries.find { it.name == value } ?: LIGHT
     }
 }
 
@@ -81,7 +81,7 @@ enum class AppPaletteStyle(
         get() = this == TONAL_SPOT || this == NEUTRAL || this == VIBRANT || this == EXPRESSIVE
 
     companion object {
-        fun fromName(value: String?) = entries.find { it.name == value } ?: TONAL_SPOT
+        fun fromName(value: String?) = entries.find { it.name == value } ?: NEUTRAL
     }
 }
 
@@ -94,7 +94,7 @@ enum class AppColorSpec(
     SPEC_2025("Expressive (2025)", ColorSpec.SpecVersion.SPEC_2025);
 
     companion object {
-        fun fromName(value: String?) = entries.find { it.name == value } ?: SPEC_2025
+        fun fromName(value: String?) = entries.find { it.name == value } ?: SPEC_2021
     }
 }
 
