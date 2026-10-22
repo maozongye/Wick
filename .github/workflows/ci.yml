@@ -141,6 +141,16 @@ jobs:
           fi
           echo "Native library names match the loaders."
 
+      # Forks cannot resolve the lsparanoid plugin, so their `build` job is skipped and no APK
+      # is produced. Publishing the native libraries lets such a checkout package an APK
+      # locally, where the plugin may be available, instead of being unable to build at all.
+      - name: Upload native libraries
+        uses: actions/upload-artifact@v7
+        with:
+          name: wick-native-libs
+          path: app/src/main/jniLibs/**/*.so
+          if-no-files-found: error
+
   # The upstream author publishes the lsparanoid Gradle plugin only to a private package
   # registry. Without it Gradle fails at configuration time, so probe for it first and skip
   # the build jobs with an explicit reason instead of showing a red build caused by a
