@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 private const val TAG = "NukeGitHubContributors"
 private const val CONTRIBUTORS_URL =
-    "https://api.github.com/repos/Ujhhgtg/WeKit/contributors?per_page=100"
+    "https://api.github.com/repos/maozongye/Wick/contributors?per_page=100"
 
 data class NukeGitHubContributor(
     val login: String,
@@ -25,7 +25,7 @@ data class NukeGitHubContributor(
 /** Public GitHub contributor data for Nuke's About page. */
 object NukeGitHubContributors {
     val fallbackContributors = listOf(
-        fallbackContributor("Ujhhgtg"),
+        fallbackContributor("maozongye"),
     )
 
     private val httpClient by lazy {

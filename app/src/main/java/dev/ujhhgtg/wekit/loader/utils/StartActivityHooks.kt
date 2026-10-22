@@ -58,20 +58,27 @@ object StartActivityHooks {
     }
 
     private fun HookParam.interceptExecStartActivity() {
+        var hit = false
         args.forEachIndexed { index, arg ->
             when (arg) {
-                is Intent -> if (shouldProxy(arg)) args[index] = createTokenWrapper(arg)
+                is Intent -> if (shouldProxy(arg)) {
+                    args[index] = createTokenWrapper(arg)
+                    hit = true
+                }
                 is Array<*> -> {
                     @Suppress("UNCHECKED_CAST")
                     val intents = arg as? Array<Intent?> ?: return@forEachIndexed
                     intents.forEachIndexed { i, intent ->
                         if (intent != null && shouldProxy(intent)) {
                             intents[i] = createTokenWrapper(intent)
+                            hit = true
                         }
                     }
                 }
             }
         }
+        // Diagnostic: distinguishes "hook never ran" from "ran but matched nothing".
+        if (!hit) WeLogger.d(TAG, "execStartActivity observed, ${args.size} args, no module intent")
     }
 
     private fun shouldProxy(intent: Intent): Boolean =

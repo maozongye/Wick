@@ -601,11 +601,11 @@ private fun NukeAboutPage(
             NukeSettingGroup(title = stringResource(R.string.nuke_about_links)) {
                 NukePreferenceRow(
                     title = stringResource(R.string.brand_github),
-                    description = "Ujhhgtg/WeKit",
+                    description = "maozongye/Wick",
                     leading = { NukeVectorCategoryIcon(GitHubIcon) },
                     trailing = { NukeCountAndChevron(text = null) },
                     onClick = {
-                        "https://github.com/Ujhhgtg/WeKit".toUri().openInSystem(context, true)
+                        "https://github.com/maozongye/Wick".toUri().openInSystem(context, true)
                     },
                 )
                 NukeDivider()

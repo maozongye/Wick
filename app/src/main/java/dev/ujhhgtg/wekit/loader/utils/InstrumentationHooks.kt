@@ -82,7 +82,12 @@ object InstrumentationHooks {
         var resolvedIntent = intent
         var resolvedClass = className
 
-        recoverProxyIntent(intent)?.takeIf { it.component != null }?.let { real ->
+        val recovered = recoverProxyIntent(intent)
+        // Diagnostic: a launch of the host stub should always log here. If the stub name shows up
+        // with recovered=null, the token was already consumed or never stored.
+        WeLogger.d(TAG, "newActivity: class=$className recovered=${recovered?.component?.className}")
+
+        recovered?.takeIf { it.component != null }?.let { real ->
             resolvedIntent = real
             resolvedClass = real.component!!.className
             WeLogger.w(TAG, "recovered intent in newActivity hook: $resolvedClass")

@@ -2,7 +2,7 @@
 
 ## Superpowers
 
-- All Superpowers workflow artifacts for WeKit (plans, specs/designs, SDD ledgers and
+- All Superpowers workflow artifacts for Wick (plans, specs/designs, SDD ledgers and
   reports, brainstorm sessions) are written, edited, and committed **only** in
   `~/coding/wekit_dev/superpowers` (its own git repo; read its `AGENTS.md` for layout and
   rules). Never create, edit, or commit `.superpowers/` or `docs/superpowers/` inside this
@@ -156,7 +156,7 @@
   database integration when they fall outside the qualifying conditions below; use the required
   build, static checks, and manual host validation instead.
 
-- TDD and new automated tests are allowed only when all core logic under test lives in WeKit,
+- TDD and new automated tests are allowed only when all core logic under test lives in Wick,
   has low coupling to WeChat, and does not depend on WeChat host classes, runtime state, UI, or
   behavior.
 - Do not add tests for simple logic that is easy to verify by static review, such as constants,
@@ -204,7 +204,7 @@
   default, e.g. `thisObject.reflekt().firstField { ... }` or `.getField(name, true)` — not
   hand-rolled `getDeclaredField`/`getMethod` traversal.
 - **NEVER use `Path.of` or `Files.writeString`.** These are frequent mistakes and
-  are unavailable on older Android API levels supported by WeKit. Convert strings through
+  are unavailable on older Android API levels supported by Wick. Convert strings through
   `dev.ujhhgtg.wekit.utils.fs.asPath` from `utils/fs/PathUtils.kt` (for example,
   `pathString.asPath` or `base.asPath.resolve(child)`) and write text through
   `kotlin.io.path.writeText`.
@@ -214,9 +214,9 @@
   Code that is correct does not need the defense; code that is wrong must throw loudly and get caught by either `HookUtils`' or code's own exception catcher, and these
   guards only swallow the exception and hide the real error. Defenses and guards that are reasonable should still exist.
 - The libraries `DexKit` and `reflekt` are NOT something you are familiar with. Do NOT hallucinate their API surfaces. Read their code before using them.
-- In Compose, `LocalContext` always means the platform context and is never localized by WeKit.
+- In Compose, `LocalContext` always means the platform context and is never localized by Wick.
   Use standard Compose resource APIs for composable text and `LocalWeKitLocalizedContext` only
-  for imperative WeKit resource reads. Mixed platform/resource operations must read both locals.
+  for imperative Wick resource reads. Mixed platform/resource operations must read both locals.
   Use `LocalActivity.current` for Activity-only APIs, and never add AndroidX owner forwarding to
   `WeKitLocaleProvider`.
 
@@ -224,7 +224,7 @@
 
 Design reference: `~/coding/InstallerX-Revived` — when unsure how a settings page should
 look or behave, read its `app/src/main/java/com/rosan/installer/ui/page/main/widget/setting/`.
-WeKit's ported widget family lives in `app/src/main/java/dev/ujhhgtg/wekit/ui/content/m3/`.
+Wick's ported widget family lives in `app/src/main/java/dev/ujhhgtg/wekit/ui/content/m3/`.
 
 ### Layout
 
@@ -271,8 +271,8 @@ Prefer these over raw Compose controls:
 
 ## Naming Conventions
 
-- 群聊: WeChat: chatroom; WeKit: group/群组
-- 朋友圈: WeChat: sns; WeKit: moment
+- 群聊: WeChat: chatroom; Wick: group/群组
+- 朋友圈: WeChat: sns; Wick: moment
 
 ## Context you need
 

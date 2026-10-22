@@ -16,7 +16,7 @@ pub struct DexTestCiArgs {
 
 #[derive(Subcommand, Debug)]
 enum DexTestCiCommand {
-    /// Extract fixed WeChat APK sources from docs/getting-started.md.
+    /// Extract fixed WeChat APK sources from tooling/wechat-apk-sources.md.
     Sources {
         #[arg(long, value_name = "PATH")]
         doc: PathBuf,

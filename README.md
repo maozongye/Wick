@@ -1,58 +1,53 @@
-# WeKit
+# Wick
 
-适用于微信的增强模块，支持 Xposed 和 Zygisk 两种加载方式。
+适用于微信的增强模块，支持 Xposed（LSPosed）和 Zygisk 两种加载方式。
 
-<img alt="fabric" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/fabric_vector.svg"> <img alt="forge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/unsupported/forge_vector.svg">
+基于 [WeKit](https://github.com/Ujhhgtg/WeKit) 的个人二开版本，主要改动方向是降低被微信检测的概率：
 
-<a href="https://ifdian.net/a/ujhhgtg"><img alt="buymeacoffee-plural" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/buymeacoffee-plural_vector.svg"></a>
-<a href="https://docs.wekit.ujhhgtg.dev"><img alt="文档" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/gitbook_vector.svg"></a>
+- 移除高风险功能（伪造类、批量自动化类、环境伪装类）
+- 系统字段替换改为方法 hook，减少可被完整性检查发现的特征
+- 安装身份、数据目录、日志前缀、线程名等派生自构建 nonce
+- 行为层加入拟人间隔与配额，并对风险信号做熔断
 
-## 文档
+## 构建
 
-请参阅 [文档](https://docs.wekit.ujhhgtg.dev) 以使用本模块。
+```bash
+./x build           # debug
+./x build --release # release（启用 R8 与字符串加密）
+./x run --zygisk    # 构建并安装为 Zygisk 模块
+```
 
-- [🚀 快速开始](https://docs.wekit.ujhhgtg.dev/getting-started)
-- [📥 安装指南](https://docs.wekit.ujhhgtg.dev/installation)
-- [🧩 Zygisk 模式](https://docs.wekit.ujhhgtg.dev/zygisk)
-- [⚙️ 配置指南](https://docs.wekit.ujhhgtg.dev/configuration)
-- [❓ 常见问题](https://docs.wekit.ujhhgtg.dev/faq)
-- [🛠 开发指南](https://docs.wekit.ujhhgtg.dev/development)
+`./x` 是 `cargo xtask` 的别名，负责编译 Rust native 库、刷新 `jniLibs/`、调用 Gradle 打包并签名。
+**不要直接跑 Gradle**：Gradle 不会编译 Rust，只会打包 `jniLibs/` 里已有的 `.so`。
 
-## 翻译 / Translation
+### 打包可安装 APK 的前提
 
-[![Translation status](https://hosted.weblate.org/widget/wekit/wekit/svg-badge.svg)](https://hosted.weblate.org/projects/wekit/wekit/)
+`jniLibs/` 里的 native 库必须来自 Linux 构建。Windows 上无法编译
+`app/src/main/rust/wekit-native`（mp3lame-sys / libvpx 的构建脚本依赖 POSIX 环境）。
+CI 的 `native` job 会把产物作为 `wick-native-libs` artifact 上传，可下载后解压到
+`app/src/main/jniLibs/` 再用 Gradle 打包。
 
-欢迎通过 [Hosted Weblate](https://hosted.weblate.org/projects/wekit/wekit/) 参与简体中文和
-繁体中文翻译。贡献流程、术语和本地校验说明见[翻译贡献指南](docs/translations/index.md)。
+### 固定包名
 
-## 联系
+默认 `applicationId` 带 nonce 派生后缀，每次构建都不同。用 LSPosed 时包名变化会被识别为新模块、
+作用域需要重新勾选，因此验证阶段建议：
 
-[Telegram 超级群组](https://t.me/+7j5dJ6g16B43OWVl)
+```bash
+./gradlew :app:assembleStandardDebug -PwekitStablePackage=true
+```
 
-[爱发电](https://ifdian.net/a/ujhhgtg)
+### 文件日志
 
-## 致谢
+```bash
+WEKIT_FILE_LOG=true ./gradlew :app:assembleStandardDebug -PwekitStablePackage=true
+```
 
-[WeKit 上游](https://github.com/cwuom/WeKit)
+日志写入 `noBackupFilesDir/<派生目录>/logs/`，仅在需要排查问题时开启——明文日志本身是一种特征。
 
-[WAuxiliary](https://github.com/HdShare/WAuxiliary_Public)
+## 版本支持
 
-[NewMiko](https://github.com/dartcv/NewMiko/blob/archives/)
+微信 8.0.65 – 8.0.78，各版本 APK 下载地址见 [tooling/wechat-apk-sources.md](tooling/wechat-apk-sources.md)。
 
-[QAuxiliary](https://github.com/cinit/QAuxiliary)
+## 许可
 
-[FingerprintPay](https://github.com/eritpchy/FingerprintPay)
-
-[WADN](https://github.com/Ujhhgtg/wauxv_deobf_new) [WAD](https://github.com/Ujhhgtg/wauxv_deobf)
-
-*^^^ 如果你需要一些我尚未从 WAuxiliary ~~抄袭~~提取的功能, 你可以自行从此处移植; 欢迎 PR!*
-
-[FunBox](https://github.com/Ujhhgtg/funbox_deobf)
-
-[I-Am-Pad](https://github.com/Houvven/I-Am-Pad)
-
----
-
-<p align="center">
-  <img src="https://github.com/Coopydood/ultimate-macOS-KVM/assets/39441479/39d78d4b-8ce8-44f4-bba7-fefdbf2f80db" width="10%"> </img>
-</p>
+GPL-3.0，见 [LICENSE](LICENSE)。本仓库包含上游 WeKit 的代码，同样受该许可约束。

@@ -1,12 +1,12 @@
-# WeKit Zygisk Module
+# Wick Zygisk Module
 
-WeKit can be loaded through Zygisk on a per-Android-user, per-package basis.
+Wick can be loaded through Zygisk on a per-Android-user, per-package basis.
 On a fresh installation, injection is disabled for every target until enabled in
 the WebUI. Updates retain existing target switches.
 
 ## KernelSU WebUI
 
-Open the WeKit module page in KernelSU to manage injection targets.
+Open the Wick module page in KernelSU to manage injection targets.
 
 - The first page open scans every Android user and adds every installed package
   matching `PackageNames.isWeChat` (`com.tencent.mm*`) as a disabled target.
@@ -24,7 +24,7 @@ updates retain it; uninstall removes it without touching app data.
 
 ## Installation and updates
 
-Every standard/legacy, debug/release WeKit APK is also an ARM64 Zygisk module ZIP.
+Every standard/legacy, debug/release Wick APK is also an ARM64 Zygisk module ZIP.
 Rename `.apk` to `.zip`, install it
 from your root manager, select the target instances in the WebUI, and restart as
 required by the manager. APK installation and module installation update their

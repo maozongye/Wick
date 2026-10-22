@@ -67,6 +67,12 @@ object ActivityThreadMessageHooks {
 
     private fun HookParam.interceptMessage() {
         val msg = args[0] as Message
+        // Diagnostic: whether this hook is reached at all, and for which message ids. If no line
+        // appears while a module activity is launched, the host installed its own mH.mCallback
+        // and Handler.dispatchMessage never falls through to handleMessage.
+        if (msg.what == LAUNCH_ACTIVITY || msg.what == EXECUTE_TRANSACTION) {
+            WeLogger.d(TAG, "handleMessage reached, what=${msg.what}")
+        }
         when (msg.what) {
             LAUNCH_ACTIVITY -> handleLaunchActivity(msg)
             EXECUTE_TRANSACTION -> handleExecuteTransaction(msg)

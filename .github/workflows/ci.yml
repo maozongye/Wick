@@ -396,7 +396,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ runner.temp }}/wekit-dex-test-apks
-          key: dex-test-apks-v1-${{ runner.os }}-${{ hashFiles('docs/getting-started.md', '.github/scripts/download-dex-test-apks.sh', 'xtask/src/dex_test_ci.rs') }}
+          key: dex-test-apks-v1-${{ runner.os }}-${{ hashFiles('tooling/wechat-apk-sources.md', '.github/scripts/download-dex-test-apks.sh', 'xtask/src/dex_test_ci.rs') }}
 
       - name: Restore DexKit desktop cache
         id: dexkit-cache
@@ -408,7 +408,7 @@ jobs:
       - name: Generate supported APK manifest
         run: |
           ./x dex-test-ci sources \
-            --doc docs/getting-started.md \
+            --doc tooling/wechat-apk-sources.md \
             --output "$RUNNER_TEMP/wekit-dex-test-sources.json"
           test "$(jq '.sources | length' "$RUNNER_TEMP/wekit-dex-test-sources.json")" -gt 0
 
@@ -499,7 +499,7 @@ jobs:
   release-dex-test:
     needs: dex-test
     runs-on: ubuntu-latest
-    if: ${{ always() && github.repository == 'Ujhhgtg/WeKit-Dev' && github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.dex-test.outputs.reports-available == 'true' }}
+    if: ${{ always() && github.repository == 'maozongye/Wick' && github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.dex-test.outputs.reports-available == 'true' }}
     permissions:
       contents: write
     steps:
@@ -538,14 +538,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          if gh release view Dex-Test --repo Ujhhgtg/WeKit >/dev/null 2>&1; then
-            gh release edit Dex-Test --repo Ujhhgtg/WeKit \
+          if gh release view Dex-Test --repo maozongye/Wick >/dev/null 2>&1; then
+            gh release edit Dex-Test --repo maozongye/Wick \
               --title "Dex Test" \
               --prerelease \
               --notes-file dist/dex-test-release/release-notes.md
           else
             gh release create Dex-Test \
-              --repo Ujhhgtg/WeKit \
+              --repo maozongye/Wick \
               --title "Dex Test" \
               --prerelease \
               --notes-file dist/dex-test-release/release-notes.md
@@ -555,11 +555,11 @@ jobs:
           while IFS= read -r asset; do
             [[ -n "$asset" ]] && upload+=("dist/dex-test-release/$asset")
           done < dist/dex-test-release/assets.txt
-          gh release upload Dex-Test --repo Ujhhgtg/WeKit "${upload[@]}" --clobber
+          gh release upload Dex-Test --repo maozongye/Wick "${upload[@]}" --clobber
 
   extensions-changes:
     runs-on: ubuntu-latest
-    if: github.repository == 'Ujhhgtg/WeKit-Dev' && github.event_name == 'push'
+    if: github.repository == 'maozongye/Wick' && github.event_name == 'push'
     outputs:
       changed: ${{ steps.filter.outputs.extensions }}
     steps:
@@ -741,7 +741,7 @@ jobs:
             done | sort
           )
           published_assets=$(
-            gh api "repos/Ujhhgtg/WeKit/releases/tags/Extensions" \
+            gh api "repos/maozongye/Wick/releases/tags/Extensions" \
               --jq '.assets[] | [.name, .digest] | @tsv' 2>/dev/null | sort || true
           )
           if [[ "$current_assets" == "$published_assets" ]]; then
@@ -756,9 +756,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          if ! gh release view Extensions --repo Ujhhgtg/WeKit >/dev/null 2>&1; then
+          if ! gh release view Extensions --repo maozongye/Wick >/dev/null 2>&1; then
             gh release create Extensions \
-              --repo Ujhhgtg/WeKit \
+              --repo maozongye/Wick \
               --title "Extensions" \
               --prerelease \
               --notes "扩展包资产。manifest.json 为最新版本索引, 本体按索引下载并校验 SHA-256。"
@@ -775,10 +775,10 @@ jobs:
             [[ "$asset" == dist/extensions/manifest.json ]] || pack_assets+=("$asset")
           done
           (( ${#pack_assets[@]} > 0 ))
-          gh release upload Extensions --repo Ujhhgtg/WeKit \
+          gh release upload Extensions --repo maozongye/Wick \
             "${pack_assets[@]}" \
             --clobber
-          gh release upload Extensions --repo Ujhhgtg/WeKit dist/extensions/manifest.json --clobber
+          gh release upload Extensions --repo maozongye/Wick dist/extensions/manifest.json --clobber
 
       - name: Remove stale pack assets
         if: steps.published.outputs.skip == 'false'
@@ -788,7 +788,7 @@ jobs:
           shopt -s nullglob
           current_files=(dist/extensions/*)
           (( ${#current_files[@]} > 0 ))
-          published_assets=$(gh release view Extensions --repo Ujhhgtg/WeKit --json assets --jq '.assets[].name')
+          published_assets=$(gh release view Extensions --repo maozongye/Wick --json assets --jq '.assets[].name')
 
           while IFS= read -r published_asset; do
             [[ -z "$published_asset" ]] && continue
@@ -800,14 +800,14 @@ jobs:
               fi
             done
             if [[ "$keep" == false ]]; then
-              gh release delete-asset Extensions --repo Ujhhgtg/WeKit "$published_asset" --yes
+              gh release delete-asset Extensions --repo maozongye/Wick "$published_asset" --yes
             fi
           done <<< "$published_assets"
 
   release-ci:
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ always() && needs.build.result == 'success' && github.repository == 'Ujhhgtg/WeKit-Dev' && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    if: ${{ always() && needs.build.result == 'success' && github.repository == 'maozongye/Wick' && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     permissions:
       contents: write
 
@@ -828,8 +828,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          gh release delete CI --repo Ujhhgtg/WeKit --yes || true
-          gh api -X DELETE repos/Ujhhgtg/WeKit/git/refs/tags/CI || true
+          gh release delete CI --repo maozongye/Wick --yes || true
+          gh api -X DELETE repos/maozongye/Wick/git/refs/tags/CI || true
 
       - name: Generate update.json
         run: |
@@ -865,7 +865,7 @@ jobs:
           } > "$RUNNER_TEMP/ci-notes.md"
 
           gh release create CI \
-            --repo Ujhhgtg/WeKit \
+            --repo maozongye/Wick \
             --title "CI" \
             --notes-file "$RUNNER_TEMP/ci-notes.md" \
             artifacts/*
@@ -873,7 +873,7 @@ jobs:
   release-ci-xposed-repo:
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ always() && needs.build.result == 'success' && github.repository == 'Ujhhgtg/WeKit-Dev' && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    if: ${{ always() && needs.build.result == 'success' && github.repository == 'maozongye/Wick' && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     concurrency:
       group: release-ci-xposed-repo-${{ github.sha }}
       cancel-in-progress: false
@@ -914,7 +914,7 @@ jobs:
   upload-telegram:
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ always() && needs.build.result == 'success' && github.repository == 'Ujhhgtg/WeKit-Dev' && github.event_name == 'workflow_dispatch' }}
+    if: ${{ always() && needs.build.result == 'success' && github.repository == 'maozongye/Wick' && github.event_name == 'workflow_dispatch' }}
     services:
       telegram-bot-api:
         image: aiogram/telegram-bot-api:latest

@@ -33,7 +33,7 @@ object MonetModulePackager {
             add(
                 "module.prop",
                 "id=wekit-monet-engine\nname=微信莫奈引擎 (WeKit)\n" +
-                    "version=$versionName ($versionCode)\nversionCode=$versionCode\nauthor=Ujhhgtg\n" +
+                    "version=$versionName ($versionCode)\nversionCode=$versionCode\nauthor=maozongye\n" +
                     "description=为微信 $versionName 启用动态壁纸取色, 由 WeKit 在运行时生成\n",
             )
             add("customize.sh", CUSTOMIZE_SCRIPT)
