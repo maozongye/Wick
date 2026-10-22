@@ -35,7 +35,7 @@ fun InjectedUiTheme(
 
         MaterialExpressiveTheme(
             colorScheme = materialScheme,
-            motionScheme = MotionScheme.expressive(),
+            motionScheme = MotionScheme.standard(),
         ) {
             content()
         }
