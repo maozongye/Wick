@@ -19,6 +19,7 @@ import dev.ujhhgtg.wekit.utils.HookParam
 import dev.ujhhgtg.wekit.utils.TargetProcess
 import dev.ujhhgtg.wekit.utils.TargetProcesses
 import dev.ujhhgtg.wekit.utils.RiskControlGate
+import dev.ujhhgtg.wekit.features.items.system.agent.WeChatForegroundTracker
 import dev.ujhhgtg.wekit.utils.WeLogger
 import dev.ujhhgtg.wekit.utils.hookAfterDirectly
 import dev.ujhhgtg.wekit.utils.hookBeforeDirectly
@@ -64,6 +65,60 @@ abstract class BaseFeature {
      */
     open val automationRisk: Boolean get() = false
 
+    /**
+     * When non-null, this feature uninstalls its hooks after this many milliseconds without
+     * interaction and reinstalls them on the next one.
+     *
+     * The host can only inspect hook state while it is running code, so shrinking the window in
+     * which hooks exist shrinks what any inspection can find. Defaults to null: leaving hooks
+     * installed for the whole process is the safe behaviour, and only features whose hooks are
+     * both expensive to observe and cheap to reinstall opt in.
+     *
+     * Idle means "no interaction for this long"; see [touch]. Hooks are also removed while the
+     * host is in the background, so the window tracks actual use rather than process lifetime.
+     */
+    open val hookIdleTimeoutMs: Long? = null
+
+    private var idleDeadline = 0L
+
+    private var idleScheduled = false
+
+    /**
+     * Marks this feature as interacted with, postponing its idle deadline and reinstalling
+     * hooks if an earlier idle sweep removed them.
+     *
+     * Call this from any handler that means the user is actively using the feature (a settings
+     * row opened, the owning UI shown, the feature's own API invoked). Features with a null
+     * [hookIdleTimeoutMs] ignore it.
+     */
+    fun touch() {
+        val timeout = hookIdleTimeoutMs ?: return
+        idleDeadline = System.currentTimeMillis() + timeout
+        // An idle sweep may have unhooked this feature; interaction is the signal to restore it.
+        // enable() is a no-op when already active, so repeated touches cost nothing.
+        if (!isActive) enable()
+    }
+
+    /** Installs the idle timer once, on the first successful enable. */
+    private fun scheduleIdleCheck() {
+        if (idleScheduled) return
+        idleScheduled = true
+        HookIdleScheduler.watch(this)
+    }
+
+    /**
+     * True when this feature should currently keep its hooks installed. Read by
+     * [HookIdleScheduler]; a feature with no timeout always returns true.
+     *
+     * Backgrounding the host closes the window immediately: hooks that only matter while the
+     * user is in the app should not stay installed behind the launcher.
+     */
+    fun hasLiveInteraction(): Boolean {
+        if (hookIdleTimeoutMs == null) return true
+        if (!WeChatForegroundTracker.isForeground) return false
+        return System.currentTimeMillis() < idleDeadline
+    }
+
     fun enable() {
         if (TargetProcesses.currentType !in targetProcesses || isActive) return
         if (automationRisk && !RiskControlGate.automationAllowed) {
@@ -81,6 +136,8 @@ abstract class BaseFeature {
         runCatching {
             isActive = true
             onEnable()
+            touch()
+            if (hookIdleTimeoutMs != null) scheduleIdleCheck()
         }.onFailure { e ->
             WeLogger.e(TAG, "failed to enable feature $technicalPath", e)
             // ensure transaction is fully discarded
