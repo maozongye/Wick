@@ -6,7 +6,7 @@ plugins {
     id("com.android.library")
 }
 
-group = "dev.ujhhgtg.wekit"
+group = "dev.wick"
 version = providers.gradleProperty("wekitPythonApiVersion")
     .orElse("1.0.0").get()
 
@@ -23,7 +23,7 @@ kotlin {
 }
 
 configure<LibraryExtension> {
-    namespace = "dev.ujhhgtg.wekit.python.api"
+    namespace = "dev.wick.python.api"
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()

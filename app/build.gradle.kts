@@ -30,8 +30,17 @@ val protectionValidation = providers.gradleProperty("dexTestWorker").orNull == "
     }
 
 lsparanoid {
+    // String protection runs on release variants only, and only when the O-MVLL toolchain is
+    // actually present. The toolchain check matters: with the JVM development backend the
+    // generated LspBootstrap.decode() throws, so every reflection lookup over an encrypted name
+    // fails silently and the launch hooks never install. Failing here is better than shipping a
+    // build whose settings entry dead-ends.
+    //
+    // -PlspProtect=false is the escape hatch for a release build on a machine without O-MVLL.
     variantFilter = { variant ->
-        !protectionValidation && (protectionOverride ?: (variant.buildType == "release"))
+        val protectRequested = providers.gradleProperty("lspProtect").orNull?.toBoolean() ?: true
+        !protectionValidation && protectRequested &&
+            (protectionOverride ?: (variant.buildType == "release"))
     }
     backend = providers.gradleProperty("lspBackend").orElse("native").get()
     automaticLoading = false
@@ -41,16 +50,23 @@ lsparanoid {
     nativeNdkVersion = providers.gradleProperty("lspNdkVersion").orElse("29.0.14206865").get()
     omvllPlugin = providers.gradleProperty("lspOmvllPlugin").orNull
     omvllPythonPath = providers.gradleProperty("lspOmvllPythonPath").orNull
-    classFilter = { it.startsWith("dev.ujhhgtg.wekit.") }
+    classFilter = { it.startsWith("dev.wick.") }
     excludedClassPrefixes = setOf(
-        "dev.ujhhgtg.wekit.application.ModuleApplication",
-        "dev.ujhhgtg.wekit.loader.startup.ModuleLoader",
-        "dev.ujhhgtg.wekit.loader.entry",
-        "dev.ujhhgtg.wekit.loader.utils.NativeLoader",
-        "dev.ujhhgtg.wekit.loader.utils.ZygiskNativePayload",
-        "dev.ujhhgtg.wekit.constants.PackageNames",
-        "dev.ujhhgtg.wekit.utils.fs.PathUtilsKt",
-        "dev.ujhhgtg.wekit.BuildConfig",
+        "dev.wick.application.ModuleApplication",
+        "dev.wick.loader.startup.ModuleLoader",
+        "dev.wick.loader.entry",
+        "dev.wick.loader.utils.NativeLoader",
+        "dev.wick.loader.utils.ZygiskNativePayload",
+        "dev.wick.constants.PackageNames",
+        "dev.wick.utils.fs.PathUtilsKt",
+        "dev.wick.BuildConfig",
+        // Method names these classes pass to reflekt must stay literal. With the JVM development
+        // backend the encrypted form cannot be decoded at runtime (decode() throws), so every
+        // reflection lookup would miss and the launch hooks would silently never install.
+        "dev.wick.loader.utils.InstrumentationHooks",
+        "dev.wick.loader.utils.StartActivityHooks",
+        "dev.wick.loader.utils.ActivityThreadMessageHooks",
+        "dev.wick.loader.utils.ActivityProxy",
     )
     if (backend == "native") {
         wrappedResourceAccess = true
@@ -99,6 +115,21 @@ fun deriveFingerprint(tag: String): String {
 val stablePackage = providers.gradleProperty("wekitStablePackage").orNull?.toBoolean() ?: false
 val fileLogging = providers.environmentVariable("WEKIT_FILE_LOG").orNull?.toBoolean() ?: false
 
+// Derived from the commit, not from the wall clock. A bare System.currentTimeMillis() is
+// evaluated during configuration, and with the configuration cache enabled that phase is
+// skipped on a hit — the stamp then silently freezes at whenever the cache entry was created,
+// which makes the displayed build time useless for telling builds apart.
+//
+// Commit time is stable for a given checkout, changes with every commit, and keeps builds
+// reproducible. SOURCE_DATE_EPOCH overrides it for callers that need an exact value.
+val buildTimestamp: Long = providers.environmentVariable("SOURCE_DATE_EPOCH").orNull
+    ?.toLongOrNull()
+    ?.times(1000)
+    ?: providers.exec {
+        workingDir(rootProject.layout.projectDirectory)
+        commandLine("git", "log", "-1", "--format=%ct")
+    }.standardOutput.asText.map { it.trim().toLong() * 1000 }.get()
+
 android {
     namespace = libs.versions.namespace.get()
     compileSdk {
@@ -135,7 +166,7 @@ android {
         buildConfigField("String", "BUILD_NONCE", "\"$buildNonce\"")
         buildConfigField("String", "INTERNAL_TAG", "\"${deriveFingerprint("tag")}\"")
         buildConfigField("boolean", "FILE_LOGGING", fileLogging.toString())
-        buildConfigField("long", "BUILD_TIMESTAMP", "${System.currentTimeMillis()}L")
+        buildConfigField("long", "BUILD_TIMESTAMP", "${buildTimestamp}L")
     }
 
     splits {
@@ -388,7 +419,7 @@ val generateScriptDepsDex = tasks.register<GenerateScriptDepsDexTask>("generateS
 // runtime off-switch, which leaves every class and hook site in the APK.
 val minimalBuild = providers.gradleProperty("wekitMinimal").orNull?.toBoolean() ?: false
 val excludedFeaturePackages = if (minimalBuild) {
-    "dev.ujhhgtg.wekit.features.items.debug"
+    "dev.wick.features.items.debug"
 } else {
     ""
 }
@@ -519,7 +550,7 @@ tasks.withType<Test>().configureEach {
     maxHeapSize = "4g"
     if (dexTestWorker.get()) {
         filter {
-            includeTestsMatching("dev.ujhhgtg.wekit.dextest.DexTestWorkerTest")
+            includeTestsMatching("dev.wick.dextest.DexTestWorkerTest")
         }
         dexTestWorkerProperties.forEach { propertyName ->
             systemProperty(propertyName, providers.gradleProperty(propertyName).orNull.orEmpty())
@@ -527,7 +558,7 @@ tasks.withType<Test>().configureEach {
         outputs.upToDateWhen { false }
     } else {
         filter {
-            excludeTestsMatching("dev.ujhhgtg.wekit.dextest.DexTestWorkerTest")
+            excludeTestsMatching("dev.wick.dextest.DexTestWorkerTest")
         }
     }
 }

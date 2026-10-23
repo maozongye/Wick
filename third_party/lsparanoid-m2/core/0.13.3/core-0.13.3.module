@@ -1,0 +1,79 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "dev.ujhhgtg.lsparanoid",
+    "module": "core",
+    "version": "0.13.3",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.8.0"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "files": [
+        {
+          "name": "core-0.13.3.jar",
+          "url": "core-0.13.3.jar",
+          "size": 9084,
+          "sha512": "102be5f7245527d890a34ef9c7309c78cd5ca9100f2cb7fb77e167af90f0b3789b7974fed0faf4b15fc6254e4b38d3612f557da0e15164f4d2789c6990c5044d",
+          "sha256": "1b4d88b343d9139f35bb3376d370c0a0599dd957dcea6050e8636cc39138e111",
+          "sha1": "496b06873e129efb4ee0f0cdde325b0200b34608",
+          "md5": "f3600891de116729c8683a96d9c7f4ec"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib"
+        }
+      ],
+      "dependencyConstraints": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "core-0.13.3.jar",
+          "url": "core-0.13.3.jar",
+          "size": 9084,
+          "sha512": "102be5f7245527d890a34ef9c7309c78cd5ca9100f2cb7fb77e167af90f0b3789b7974fed0faf4b15fc6254e4b38d3612f557da0e15164f4d2789c6990c5044d",
+          "sha256": "1b4d88b343d9139f35bb3376d370c0a0599dd957dcea6050e8636cc39138e111",
+          "sha1": "496b06873e129efb4ee0f0cdde325b0200b34608",
+          "md5": "f3600891de116729c8683a96d9c7f4ec"
+        }
+      ]
+    }
+  ]
+}

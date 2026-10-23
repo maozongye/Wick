@@ -8,7 +8,27 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <queries>
+        <!--
+          Android 11+ hides other packages unless they are declared here. Cloned WeChat keeps the
+          base name plus a suffix, so each known variant is listed; without this the module cannot
+          resolve a clone's package at all, whatever the LSPosed scope says.
+        -->
         <package android:name="com.tencent.mm" />
+        <package android:name="com.tencent.mm.u" />
+        <package android:name="com.tencent.mm.s" />
+        <package android:name="com.tencent.mm.dual" />
+        <package android:name="com.tencent.mm.clone" />
+        <package android:name="com.tencent.mm.work" />
+        <!--
+          Fallback for clone suffixes not enumerated above: a launcher intent query matches any
+          package exposing a main launcher activity, so a vendor-specific clone is visible even
+          when its exact package name is unknown. The package entries stay because they are
+          cheaper and cover the multi-instance spellings directly.
+        -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
     </queries>
 
     <application
@@ -106,8 +126,15 @@
         <meta-data
             android:name="xposedminversion"
             android:value="51" />
-        <meta-data
-            android:name="xposedscope"
-            android:resource="@array/xposed_scope" />
+        <!--
+          No xposedscope entry on purpose.
+
+          Declaring xposedscope makes LSPosed restrict its scope picker to exactly the listed
+          packages, and the underlying resource array has no wildcard form. WeChat clones append
+          their own suffix to the package name (com.tencent.mm.u, vendor-specific variants, ...),
+          so any list is incomplete by construction and a clone silently never appears in the
+          picker. Omitting the declaration makes LSPosed list every installed app, which costs a
+          manual search but cannot exclude a valid target.
+        -->
     </application>
 </manifest>

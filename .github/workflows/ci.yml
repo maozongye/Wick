@@ -151,10 +151,14 @@ jobs:
           path: app/src/main/jniLibs/**/*.so
           if-no-files-found: error
 
-  # The upstream author publishes the lsparanoid Gradle plugin only to a private package
-  # registry. Without it Gradle fails at configuration time, so probe for it first and skip
-  # the build jobs with an explicit reason instead of showing a red build caused by a
-  # dependency no fork can obtain.
+  # lsparanoid is published only to the upstream author's private registry, so the jars are
+  # vendored under third_party/ in a plain Maven layout.
+  #
+  # They are installed into ~/.m2 rather than declared as a `maven { url = ... }` repository:
+  # Gradle's plugin resolver does find the plugin that way, but our attempt to point a plain
+  # maven repository at the same directory never issued a single lookup for it (mavenLocal has
+  # behaviour a file-backed maven repository does not). Copying into ~/.m2 and keeping the
+  # existing mavenLocal declaration is the arrangement that is verified to resolve.
   dependencies:
     runs-on: ubuntu-latest
     outputs:
@@ -162,17 +166,25 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - id: probe
-        name: Probe for the private lsparanoid plugin
+        name: Install the vendored lsparanoid into the local Maven repository
         run: |
           set -euo pipefail
-          # mavenLocal() is the only repository the upstream config declares for this group.
-          if [ -d "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-            echo "lsparanoid plugin found in the local Maven repository."
-          else
+          vendored="$GITHUB_WORKSPACE/third_party/lsparanoid-m2"
+          if [ ! -d "$vendored/dev.ujhhgtg.lsparanoid.gradle.plugin" ]; then
             echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=lsparanoid unavailable::The lsparanoid Gradle plugin is published only to a private registry, so this fork cannot build the APK. Build and dex-test are skipped; everything that does not need that plugin still runs."
+            echo "::error title=lsparanoid missing::$vendored does not contain the plugin marker"
+            exit 0
           fi
+          mkdir -p "$HOME/.m2/repository/dev/ujhhgtg"
+          cp -r "$vendored" "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid"
+          # The artifacts are complete only if every module directory carries a 0.13.3 payload.
+          for module in core gradle-plugin processor runtime; do
+            test -d "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid/$module/0.13.3"      || {
+              echo "::error title=lsparanoid incomplete::missing $module/0.13.3"; exit 1; }
+          done
+          echo "available=true" >> "$GITHUB_OUTPUT"
+          echo "lsparanoid installed from third_party/lsparanoid-m2"
+          find "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid" -type f | sort
 
   build:
     needs: dependencies
@@ -291,6 +303,26 @@ jobs:
         if: github.event_name != 'pull_request' && steps.signing.outputs.available == 'true'
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > $RUNNER_TEMP/wekit-keystore.jks
+
+      # lsparanoid's native backend needs O-MVLL to encode native strings; without it the
+      # protected variant fails with "Native protection requires O-MVLL". Upstream ships a
+      # prebuilt Linux archive, which is the only platform this runner needs.
+      - name: Install O-MVLL toolchain
+        run: |
+          set -euo pipefail
+          dest="$HOME/.local/share/lspeciallyparanoid/toolchains/omvll-1.9.1"
+          mkdir -p "$dest"
+          url="https://github.com/open-obfuscator/o-mvll/releases/download/1.9.1/omvll_v1-9-1_linux_2026-07-06T09_44_15.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/omvll.tar.gz" "$url"
+          tar -xzf "$RUNNER_TEMP/omvll.tar.gz" -C "$dest" --strip-components=1
+          # The plugin validates this exact filename before the protected variant runs.
+          test -f "$dest/omvll-ndk.so" || {
+            echo "::error title=O-MVLL missing::omvll-ndk.so not found under $dest"
+            find "$dest" -maxdepth 2 -type f | head -40
+            exit 1
+          }
+          echo "O-MVLL installed:"
+          ls -la "$dest"
 
       - name: Build Release (Signed)
         if: github.event_name != 'pull_request' && steps.signing.outputs.available == 'true'

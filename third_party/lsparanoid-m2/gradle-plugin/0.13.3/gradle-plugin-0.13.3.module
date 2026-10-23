@@ -1,0 +1,96 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "dev.ujhhgtg.lsparanoid",
+    "module": "gradle-plugin",
+    "version": "0.13.3",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.8.0"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "gradle-plugin-0.13.3.jar",
+          "url": "gradle-plugin-0.13.3.jar",
+          "size": 100270,
+          "sha512": "e5d16bad3f16f036b4777435eec1222850400daecbf8ddbf2ac73fc25b1b56a24586eb3354173fd461ed5c8d3debc97f5663ac44bad63cc9c906ed972df8e49e",
+          "sha256": "591fb6344a77344826c0640f7a955354bb606efcabfecc971220b30682870356",
+          "sha1": "608358c34f644cf3eaae953d141632a19d773fc8",
+          "md5": "8be6db629a1f0013d33f72f7f85691dd"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "dev.ujhhgtg.lsparanoid",
+          "module": "core",
+          "version": {
+            "requires": "0.13.3"
+          }
+        },
+        {
+          "group": "dev.ujhhgtg.lsparanoid",
+          "module": "processor",
+          "version": {
+            "requires": "0.13.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "gradle-plugin-0.13.3.jar",
+          "url": "gradle-plugin-0.13.3.jar",
+          "size": 100270,
+          "sha512": "e5d16bad3f16f036b4777435eec1222850400daecbf8ddbf2ac73fc25b1b56a24586eb3354173fd461ed5c8d3debc97f5663ac44bad63cc9c906ed972df8e49e",
+          "sha256": "591fb6344a77344826c0640f7a955354bb606efcabfecc971220b30682870356",
+          "sha1": "608358c34f644cf3eaae953d141632a19d773fc8",
+          "md5": "8be6db629a1f0013d33f72f7f85691dd"
+        }
+      ]
+    }
+  ]
+}

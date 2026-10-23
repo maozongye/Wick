@@ -1,19 +1,19 @@
 # ====================================================================
 # XPOSED ENTRY POINTS (Critical Startup)
 # ====================================================================
-Ldev/ujhhgtg/wekit/loader/entry/lxp/LxpHookEntry;
-Ldev/ujhhgtg/wekit/loader/entry/xp51/Xp51HookEntry;
+Ldev/wick/loader/entry/lxp/LxpHookEntry;
+Ldev/wick/loader/entry/xp51/Xp51HookEntry;
 
 # ====================================================================
 # CORE APIs & INTERNAL HOOKING INTERFACES
 # ====================================================================
-Ldev/ujhhgtg/wekit/features/api/core/WeAppMsgApi;
-Ldev/ujhhgtg/wekit/features/api/core/WeConversationApi;
-Ldev/ujhhgtg/wekit/features/api/core/WeDatabaseApi;
-Ldev/ujhhgtg/wekit/features/api/core/WeDatabaseListenerApi;
-Ldev/ujhhgtg/wekit/features/api/core/WeMessageApi;
-Ldev/ujhhgtg/wekit/features/api/core/WeServiceApi;
-Ldev/ujhhgtg/wekit/features/api/core/WeUnsafeApi;
-Ldev/ujhhgtg/wekit/features/api/net/WeNetSceneApi;
-Ldev/ujhhgtg/wekit/features/api/net/WePacketHelper;
-Ldev/ujhhgtg/wekit/features/api/net/listener/WePacketDispatcher;
+Ldev/wick/features/api/core/WeAppMsgApi;
+Ldev/wick/features/api/core/WeConversationApi;
+Ldev/wick/features/api/core/WeDatabaseApi;
+Ldev/wick/features/api/core/WeDatabaseListenerApi;
+Ldev/wick/features/api/core/WeMessageApi;
+Ldev/wick/features/api/core/WeServiceApi;
+Ldev/wick/features/api/core/WeUnsafeApi;
+Ldev/wick/features/api/net/WeNetSceneApi;
+Ldev/wick/features/api/net/WePacketHelper;
+Ldev/wick/features/api/net/listener/WePacketDispatcher;

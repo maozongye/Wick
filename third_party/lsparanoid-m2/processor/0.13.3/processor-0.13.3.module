@@ -1,0 +1,131 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "dev.ujhhgtg.lsparanoid",
+    "module": "processor",
+    "version": "0.13.3",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.8.0"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "processor-0.13.3.jar",
+          "url": "processor-0.13.3.jar",
+          "size": 457742,
+          "sha512": "ca4bcc2e3305b1658a34121d5b7a47442cf273f4b80bc1263c617fb32d4582e9bbc2e67cbff29321ec41807ec5f39fc84eab0aaa44237eec9c199a96b273b75f",
+          "sha256": "23bab374b7e495792705656a75c05b30592f45107a63f4892dbb9369a9002e31",
+          "sha1": "e3f7505d642b6021602d08b773c2ae1cc6b2cc1d",
+          "md5": "4aa8c7954a89938630a2534021556bca"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "dev.ujhhgtg.lsparanoid",
+          "module": "core",
+          "version": {
+            "requires": "0.13.3"
+          }
+        },
+        {
+          "group": "com.joom.grip",
+          "module": "grip",
+          "version": {
+            "requires": "0.11.0"
+          }
+        },
+        {
+          "group": "org.ow2.asm",
+          "module": "asm-commons",
+          "version": {
+            "requires": "9.10.1"
+          }
+        },
+        {
+          "group": "org.ow2.asm",
+          "module": "asm-tree",
+          "version": {
+            "requires": "9.10.1"
+          }
+        },
+        {
+          "group": "org.ow2.asm",
+          "module": "asm-analysis",
+          "version": {
+            "requires": "9.10.1"
+          }
+        },
+        {
+          "group": "com.android.tools.build",
+          "module": "aapt2-proto",
+          "version": {
+            "requires": "9.4.1-15978811"
+          }
+        },
+        {
+          "group": "com.google.protobuf",
+          "module": "protobuf-java",
+          "version": {
+            "requires": "3.25.8"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "processor-0.13.3.jar",
+          "url": "processor-0.13.3.jar",
+          "size": 457742,
+          "sha512": "ca4bcc2e3305b1658a34121d5b7a47442cf273f4b80bc1263c617fb32d4582e9bbc2e67cbff29321ec41807ec5f39fc84eab0aaa44237eec9c199a96b273b75f",
+          "sha256": "23bab374b7e495792705656a75c05b30592f45107a63f4892dbb9369a9002e31",
+          "sha1": "e3f7505d642b6021602d08b773c2ae1cc6b2cc1d",
+          "md5": "4aa8c7954a89938630a2534021556bca"
+        }
+      ]
+    }
+  ]
+}
