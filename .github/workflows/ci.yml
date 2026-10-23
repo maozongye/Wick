@@ -206,6 +206,26 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
+      # Each job runs on a fresh runner, so the dependencies job's ~/.m2 contents are not
+      # visible here. The vendored plugin has to be installed in this job as well.
+      - name: Install vendored lsparanoid
+        run: |
+          set -euo pipefail
+          vendored="$GITHUB_WORKSPACE/third_party/lsparanoid-m2"
+          test -d "$vendored/dev.ujhhgtg.lsparanoid.gradle.plugin" || {
+            echo "::error title=lsparanoid missing::$vendored lacks the plugin marker"
+            exit 1
+          }
+          mkdir -p "$HOME/.m2/repository/dev/ujhhgtg"
+          cp -r "$vendored" "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid"
+          for module in core gradle-plugin processor runtime; do
+            test -d "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid/$module/0.13.3" || {
+              echo "::error title=lsparanoid incomplete::missing $module/0.13.3"
+              exit 1
+            }
+          done
+          echo "lsparanoid installed into ~/.m2"
+
       - name: Free disk space for build and caches
         # Cache uploads need space for a temporary archive after the APK build.
         run: |
@@ -401,6 +421,20 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+
+      # Gradle resolves the plugin during configuration, so this job needs the vendored
+      # copy installed locally as well.
+      - name: Install vendored lsparanoid
+        run: |
+          set -euo pipefail
+          vendored="$GITHUB_WORKSPACE/third_party/lsparanoid-m2"
+          test -d "$vendored/dev.ujhhgtg.lsparanoid.gradle.plugin" || {
+            echo "::error title=lsparanoid missing::$vendored lacks the plugin marker"
+            exit 1
+          }
+          mkdir -p "$HOME/.m2/repository/dev/ujhhgtg"
+          cp -r "$vendored" "$HOME/.m2/repository/dev/ujhhgtg/lsparanoid"
+          echo "lsparanoid installed into ~/.m2"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
